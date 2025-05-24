@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -22,9 +22,7 @@ export default function LoginPage() {
       });
 
       if (!res.ok) throw new Error("Invalid credentials");
-
-      // Example: redirect to Feed or Dashboard on success
-      router.push("/Frontend/Feed");
+      router.push("/Frontend/Feed"); // ✅ redirect after successful login
     } catch (err) {
       alert(err.message);
     }
@@ -53,7 +51,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-sm text-gray-600">
-          Dont have an account?{" "}
+          Don't have an account?{" "}
           <Link href="/Frontend/Auth/Register" className="text-blue-600 hover:underline">
             Register
           </Link>

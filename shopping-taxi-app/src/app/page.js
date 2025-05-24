@@ -1,6 +1,3 @@
-/* this is first landing page, probably i delete the previous one */
-/* set up nextjs app with tailwindcss */
-'use client';   
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -9,18 +6,18 @@ export default function LandingPage() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6 py-12 text-center">
       <div className="max-w-3xl">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">
-          Smart Shopping, Simplified Commutes
+          Plan Smarter Shopping, Travel Efficiently
         </h1>
         <p className="text-lg text-gray-700 mb-8">
-          Plan your shopping trips with ease. Discover store locations, optimize travel, and save time and money on your errands—all in one app.
+          A better way to combine shopping and commuting — save time, money, and energy.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link href="/Frontend/Feed">
-            <Button size="lg">Enter App</Button>
-          </Link>
           <Link href="/Frontend/Auth/Login">
-            <Button size="lg" variant="outline">Login</Button>
+            <Button size="lg">Login</Button>
+          </Link>
+          <Link href="/Frontend/Auth/Register">
+            <Button size="lg" variant="outline">Register</Button>
           </Link>
         </div>
       </div>
@@ -31,4 +28,3 @@ export default function LandingPage() {
     </main>
   );
 }
-

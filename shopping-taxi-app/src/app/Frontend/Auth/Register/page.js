@@ -10,10 +10,18 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -24,9 +32,9 @@ export default function RegisterPage() {
 
       if (!res.ok) throw new Error("Registration failed");
 
-      router.push("/Frontend/Feed"); // ✅ auto-login or redirect after registration
+      router.push("/Frontend/Feed"); // redirect on success
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     }
   };
 
@@ -34,6 +42,7 @@ export default function RegisterPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-6 bg-white p-8 shadow-md rounded-xl">
         <h2 className="text-center text-2xl font-bold">Create your account</h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="email"
@@ -56,6 +65,16 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <Input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
           <Button type="submit" className="w-full">Register</Button>
         </form>
 

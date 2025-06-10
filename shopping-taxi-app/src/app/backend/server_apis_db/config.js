@@ -1,7 +1,21 @@
-// 🧠 config.js
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const config = {
+interface DBConfig {
+  user: string | undefined;
+  host: string | undefined;
+  name: string | undefined;
+  password: string | undefined;
+  port: string | undefined;
+}
+
+interface AppConfig {
+  port: string | number;
+  db: DBConfig;
+  baseUrl: string;
+}
+
+const config: AppConfig = {
   port: process.env.PORT || 5000,
   db: {
     user: process.env.DB_USER,
@@ -11,7 +25,6 @@ const config = {
     port: process.env.DB_PORT,
   },
   baseUrl: process.env.BASE_URL || "http://localhost:5000",
-  // For serving images and links
 };
 
-module.exports = config;
+export default config;

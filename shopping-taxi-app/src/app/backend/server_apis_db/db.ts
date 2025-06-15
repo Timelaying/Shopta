@@ -1,14 +1,14 @@
 //db.ts
 import { Pool } from 'pg';
 import config from './config';
-import { databaseUrl } from './config'; // Ensure that the database URL is set correctly
 
 const pool = new Pool({
-  user: 'your_db_user',
-  host: 'localhost',
-  database: 'your_db_name',
-  password: 'your_db_password',
-  port: 5432,
+  user: config.db.user,
+  host: config.db.host,
+  database: config.db.name,
+  password: config.db.password,
+  port: config.db.port,
+  connectionString: databaseUrl,
 });
 
 const initializeDatabase = async () => {

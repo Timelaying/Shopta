@@ -1,4 +1,7 @@
+//db.ts
 import { Pool } from 'pg';
+import config from './config';
+import { databaseUrl } from './config'; // Ensure that the database URL is set correctly
 
 const pool = new Pool({
   user: 'your_db_user',

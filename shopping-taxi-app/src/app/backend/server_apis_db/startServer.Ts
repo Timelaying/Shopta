@@ -1,19 +1,15 @@
 // startServer.ts
-import http from "http";
 import { Application } from "express";
 
 /**
- * Starts the Express server.
+ * Starts the Express app on the specified port.
  *
- * @param app - The Express app instance.
- * @param port - The port to listen on.
+ * @param app - The Express application.
+ * @param port - Port number.
  * @param callback - Optional callback after server starts.
- * @returns The HTTP server instance.
  */
-function startServer(app: Application, port: number, callback?: () => void): http.Server {
-  const server = http.createServer(app);
-
-  server.listen(port, () => {
+function startServer(app: Application, port: number, callback?: () => void) {
+  const server = app.listen(port, () => {
     console.log(`🚀 Server is running at http://localhost:${port}`);
     if (callback) callback();
   });

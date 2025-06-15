@@ -1,4 +1,3 @@
-//db.ts
 import { Pool } from 'pg';
 import config from './config';
 
@@ -8,10 +7,11 @@ const pool = new Pool({
   database: config.db.name,
   password: config.db.password,
   port: config.db.port,
-  connectionString: databaseUrl,
+  // connectionString is optional – only needed if overriding user/host/etc.
+  ...(config.db.connectionString ? { connectionString: config.db.connectionString } : {}),
 });
 
-const initializeDatabase = async () => {
+const initializeDatabase = async (): Promise<void> => {
   const client = await pool.connect();
   try {
     console.log('⏳ Connecting to the database...');

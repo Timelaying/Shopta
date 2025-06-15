@@ -18,7 +18,8 @@ function startServer(app: Application, port: number, callback?: () => void): htt
     if (callback) callback();
   });
 
-  // Optional: Handle graceful shutdowns
+  // Optional: Handle graceful shutdowns (use at server.ts or entry point as i add issues at point here)
+  /*
   process.on("SIGINT", () => {
     console.log("\n🛑 Gracefully shutting down...");
     server.close(() => {
@@ -26,6 +27,8 @@ function startServer(app: Application, port: number, callback?: () => void): htt
       process.exit(0);
     });
   });
+
+  */
 
   return server;
 }

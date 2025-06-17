@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
 
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
@@ -18,3 +19,4 @@ export const errorHandler = (
     stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
   });
 };
+/* eslint-enable @typescript-eslint/no-unused-vars */

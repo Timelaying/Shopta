@@ -1,0 +1,5 @@
+{
+  "watch": ["src/app/backend"],
+  "ext": "ts",
+  "exec": "tsx src/app/backend/server_apis_db/server.ts"
+}

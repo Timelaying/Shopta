@@ -1,3 +1,4 @@
+// db.ts
 import { Pool } from 'pg';
 import config from './config';
 
@@ -7,11 +8,10 @@ const pool = new Pool({
   database: config.db.name,
   password: config.db.password,
   port: config.db.port,
-  // connectionString is optional – only needed if overriding user/host/etc.
   ...(config.db.connectionString ? { connectionString: config.db.connectionString } : {}),
 });
 
-const initializeDatabase = async (): Promise<void> => {
+export const initializeDatabase = async (): Promise<void> => {
   const client = await pool.connect();
   try {
     console.log('⏳ Connecting to the database...');
@@ -23,11 +23,7 @@ const initializeDatabase = async (): Promise<void> => {
         username VARCHAR(50) UNIQUE NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        location VARCHAR(255),
-        bio TEXT,
-        profile_picture TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        refresh_token TEXT
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -80,12 +76,11 @@ const initializeDatabase = async (): Promise<void> => {
     console.log('✅ Database initialized successfully.');
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('❌ Error initializing database:', err);
+    console.error('❌ Failed to initialize database:', err);
+    throw err; // bubble up the error so server doesn't start silently
   } finally {
     client.release();
   }
 };
-
-initializeDatabase();
 
 export default pool;

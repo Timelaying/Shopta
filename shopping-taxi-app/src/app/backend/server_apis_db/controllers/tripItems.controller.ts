@@ -1,25 +1,39 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as TripItemModel from '../models/tripItems.model';
 
-export const addItemToTrip = async (req: Request, res: Response) => {
+export const addItemToTrip = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const { tripId, itemId, quantity } = req.body;
-  if (!tripId || !itemId) return res.status(400).json({ error: 'Trip ID and Item ID are required' });
-  if (quantity === undefined) return res.status(400).json({ error: 'Quantity is required' });
+  if (!tripId || !itemId) {
+    res.status(400).json({ error: 'Trip ID and Item ID are required' });
+    return;
+  }
+  if (quantity === undefined) {
+    res.status(400).json({ error: 'Quantity is required' });
+    return;
+  }
 
   try {
     const item = await TripItemModel.addItemToTrip(tripId, itemId, quantity);
     res.status(201).json(item);
-  } catch {
-    res.status(500).json({ error: 'Failed to add item to trip' });
+  } catch (err) {
+    next(err);
   }
 };
 
-export const getTripItems = async (req: Request, res: Response) => {
-  const tripId = parseInt(req.params.tripId);
+export const getTripItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const tripId = parseInt(req.params.tripId, 10);
   try {
     const items = await TripItemModel.getTripItems(tripId);
     res.json(items);
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch trip items' });
+  } catch (err) {
+    next(err);
   }
 };

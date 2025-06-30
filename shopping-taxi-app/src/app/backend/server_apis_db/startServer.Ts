@@ -9,24 +9,37 @@ import { Application } from "express";
  * @param callback - Optional callback after server starts.
  */
 function startServer(app: Application, port: number, callback?: () => void) {
-  const server = app.listen(port, () => {
-    console.log(`🚀 Server is running at http://localhost:${port}`);
-    if (callback) callback();
-  });
-
-  // Optional: Handle graceful shutdowns (use at server.ts or entry point as i add issues at point here)
-  /*
-  process.on("SIGINT", () => {
-    console.log("\n🛑 Gracefully shutting down...");
-    server.close(() => {
-      console.log("✅ Server closed.");
-      process.exit(0);
+  try {
+    const server = app.listen(port, () => {
+      console.log(`🚀 Server is running at http://localhost:${port}`);
+      if (callback) callback();
     });
-  });
 
-  */
+    // Optional: Handle graceful shutdown
+    /*
+    process.on("SIGINT", () => {
+      console.log("\n🛑 Gracefully shutting down...");
+      server.close(() => {
+        console.log("✅ Server closed.");
+        process.exit(0);
+      });
+    });
+    */
 
-  return server;
+    server.on("error", (error: any) => {
+      if (error.code === "EADDRINUSE") {
+        console.error(`❌ Port ${port} is already in use. Please choose a different port.`);
+      } else {
+        console.error("❌ Server failed to start:", error);
+      }
+      process.exit(1);
+    });
+
+    return server;
+  } catch (error) {
+    console.error("❌ Unexpected error while starting server:", error);
+    process.exit(1);
+  }
 }
 
 export default startServer;

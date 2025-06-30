@@ -1,26 +1,36 @@
-import { Request, Response } from 'express';
+// storeItems.controller.ts
+import { Request, Response, NextFunction } from 'express';
 import * as StoreItemModel from '../models/storeItems.model';
 
-export const linkItemToStore = async (req: Request, res: Response) => {
+export const linkItemToStore = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const { storeId, itemId, price } = req.body;
   if (!storeId || !itemId || price === undefined) {
-    return res.status(400).json({ error: 'Missing link fields' });
+    res.status(400).json({ error: 'Missing link fields' });
+    return;
   }
 
   try {
     const link = await StoreItemModel.linkItemToStore(storeId, itemId, price);
     res.status(201).json(link);
-  } catch {
-    res.status(500).json({ error: 'Failed to link item to store' });
+  } catch (err) {
+    next(err);
   }
 };
 
-export const getStoreItems = async (req: Request, res: Response) => {
-  const storeId = parseInt(req.params.storeId);
+export const getStoreItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const storeId = parseInt(req.params.storeId, 10);
   try {
     const items = await StoreItemModel.getStoreItems(storeId);
     res.json(items);
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch store items' });
+  } catch (err) {
+    next(err);
   }
 };

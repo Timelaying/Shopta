@@ -24,7 +24,7 @@ interface AppConfig {
 }
 
 const config: AppConfig = {
-  port: process.env.PORT ? parseInt(process.env.PORT) : 5000,
+  port: process.env.PORT ? parseInt(process.env.PORT) : 5001,
   db: {
     user: requireEnv("DB_USER"),
     host: requireEnv("DB_HOST"),

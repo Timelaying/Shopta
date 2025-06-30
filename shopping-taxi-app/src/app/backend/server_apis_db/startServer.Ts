@@ -1,6 +1,8 @@
 // startServer.ts
 import { Application } from "express";
 
+let currentServer: ReturnType<Application["listen"]> | null = null;
+
 /**
  * Starts the Express app on the specified port.
  *
@@ -9,24 +11,20 @@ import { Application } from "express";
  * @param callback - Optional callback after server starts.
  */
 function startServer(app: Application, port: number, callback?: () => void) {
+  // Close existing server if running (for nodemon restarts)
+  if (currentServer) {
+    currentServer.close(() => {
+      console.log(`🔁 Previous server on port ${port} closed.`);
+    });
+  }
+
   try {
-    const server = app.listen(port, () => {
+    currentServer = app.listen(port, () => {
       console.log(`🚀 Server is running at http://localhost:${port}`);
       if (callback) callback();
     });
 
-    // Optional: Handle graceful shutdown
-    /*
-    process.on("SIGINT", () => {
-      console.log("\n🛑 Gracefully shutting down...");
-      server.close(() => {
-        console.log("✅ Server closed.");
-        process.exit(0);
-      });
-    });
-    */
-
-    server.on("error", (error: any) => {
+    currentServer.on("error", (error: any) => {
       if (error.code === "EADDRINUSE") {
         console.error(`❌ Port ${port} is already in use. Please choose a different port.`);
       } else {
@@ -35,7 +33,16 @@ function startServer(app: Application, port: number, callback?: () => void) {
       process.exit(1);
     });
 
-    return server;
+    // Optional graceful shutdown on Ctrl+C
+    process.on("SIGINT", () => {
+      console.log("\n🛑 Gracefully shutting down...");
+      currentServer?.close(() => {
+        console.log("✅ Server closed.");
+        process.exit(0);
+      });
+    });
+
+    return currentServer;
   } catch (error) {
     console.error("❌ Unexpected error while starting server:", error);
     process.exit(1);

@@ -53,7 +53,7 @@ const boot = async () => {
     await initializeDatabase(); // 🔧 Important: Wait for DB setup before running server
     startServer(app, config.port);
   } catch (error) {
-    console.error('❌ Failed to start server due to database error.');
+    console.error('❌ Failed to start server due to database error.', error);
     process.exit(1); // Exit with failure status
   }
 };

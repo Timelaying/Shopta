@@ -1,2 +1,3 @@
 we are using typescript so the way packages are imported are different.
-we used nodemone fro the automaic server restart
+we used nodemone fro the automatic server restart
+TYpscript is all about types hence so many error

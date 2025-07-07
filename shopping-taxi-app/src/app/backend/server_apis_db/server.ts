@@ -2,7 +2,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import routes from "./routes/index"; // Adjust path if needed
-import config from "./config";
+import config from "./config/config";
 import startServer from "./startServer";
 import { initializeDatabase } from './db';
 import { notFound, errorHandler } from "./middleware/errorHandlers"; // Optional

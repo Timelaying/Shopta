@@ -1,6 +1,6 @@
 // db.ts
 import { Pool } from 'pg';
-import config from './config';
+import config from './config/config';
 
 const pool = new Pool({
   user: config.db.user,

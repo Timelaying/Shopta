@@ -6,6 +6,9 @@ import config from "./config/config";
 import startServer from "./startServer";
 import { initializeDatabase } from './db';
 import { notFound, errorHandler } from "./middleware/errorHandlers"; // Optional
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/auth.routes';
+import { jwtMiddleware } from './middleware/jwtMiddleware';
 
 // imports fro routes 
 import userRoutes from './routes/users.routes';
@@ -22,6 +25,7 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); // For parsing cookies
 
 // Health check
 app.get("/api/health", (_req: Request, res: Response) => {
@@ -30,6 +34,13 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 // API Routes
 app.use("/api", routes);
+
+
+// Auth routes (unprotected)
+app.use('/api/auth', authRoutes);
+
+// Protect all other /api routes
+app.use('/api', jwtMiddleware);
 
 // Mount routes
 app.use('/api/users', userRoutes);

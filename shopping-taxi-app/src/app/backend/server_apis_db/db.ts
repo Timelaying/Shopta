@@ -28,6 +28,16 @@ export const initializeDatabase = async (): Promise<void> => {
     `);
 
     await client.query(`
+      CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        token VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+        UNIQUE(user_id, token)
+      );
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS stores (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,

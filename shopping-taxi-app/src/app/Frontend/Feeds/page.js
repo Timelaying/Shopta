@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ProtectedRoute from '@/app/components/ProtectedRoute';
+import ProtectedRoute from '@/app/components2/ProtectedRoute';
 
 
 export default function FeedPage() {

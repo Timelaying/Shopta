@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ProtectedRoute from '@/app/components/ProtectedRoute';
+
 
 export default function FeedPage() {
   const [username, setUsername] = useState("");
@@ -34,6 +36,8 @@ export default function FeedPage() {
   }, []);
 
   return (
+    <ProtectedRoute>
+      <div>Your protected feed content here...</div>
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-6">
         Welcome back, {username || "..."}
@@ -59,5 +63,6 @@ export default function FeedPage() {
         )}
       </div>
     </main>
+    </ProtectedRoute>
   );
 }

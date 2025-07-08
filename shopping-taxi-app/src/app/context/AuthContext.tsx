@@ -4,7 +4,7 @@ import { authService } from '@/app/services/authService';
 import { parseJwt } from '@/app/utils/jwt';
 
 interface AuthContextType {
-  user: any;
+  user: unknown;
   login: (data: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -12,7 +12,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<unknown>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');

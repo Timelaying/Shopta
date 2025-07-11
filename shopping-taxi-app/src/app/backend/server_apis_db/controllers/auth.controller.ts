@@ -1,6 +1,5 @@
 // src/controllers/auth.controller.ts
-
-import { Request, Response, NextFunction } from 'express';
+import { RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import * as UserModel from '../models/users.model';
 import * as TokenModel from '../models/token.model';
@@ -12,41 +11,39 @@ import {
 } from '../utils/jwt';
 import { AuthenticatedRequest } from '../middleware/jwtMiddleware';
 
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const register: RequestHandler = async (req, res, next): Promise<void> => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
-    return res.status(400).json({ error: 'Missing fields' });
+    res.status(400).json({ error: 'Missing fields' });
+    return;
   }
   try {
     const hashed = await bcrypt.hash(password, 10);
     const user = await UserModel.createUser(username, email, hashed);
     res.status(201).json({ user });
+    return;
   } catch (error) {
     next(error);
+    return;
   }
 };
 
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const login: RequestHandler = async (req, res, next): Promise<void> => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ error: 'Missing fields' });
+    res.status(400).json({ error: 'Missing fields' });
+    return;
   }
   try {
     const user = await UserModel.findUserByEmail(email);
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
     const payload = { id: user.id, username: user.username };
@@ -61,25 +58,25 @@ export const login = async (
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
     res.json({ accessToken });
+    return;
   } catch (error) {
     next(error);
+    return;
   }
 };
 
-export const refresh = async (
-  req: Request,
-  res: Response) => {
+export const refresh: RequestHandler = async (req, res,): Promise<void> => {
   const token = req.cookies.refreshToken;
   if (!token) {
-    return res.status(401).json({ error: 'No refresh token' });
+    res.status(401).json({ error: 'No refresh token' });
+    return;
   }
   try {
-    // explicitly type the decoded payload
     const decoded = verifyRefreshToken(token) as AccessTokenPayload;
-
     const valid = await TokenModel.isTokenValid(decoded.id, token);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid refresh token' });
+      res.status(401).json({ error: 'Invalid refresh token' });
+      return;
     }
 
     const payload = { id: decoded.id, username: decoded.username };
@@ -94,16 +91,14 @@ export const refresh = async (
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
     res.json({ accessToken });
+    return;
   } catch {
-    return res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid token' });
+    return;
   }
 };
 
-export const logout = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const logout: RequestHandler = async (req, res, next): Promise<void> => {
   const token = req.cookies.refreshToken;
   try {
     if (token) {
@@ -111,23 +106,32 @@ export const logout = async (
     }
     res.clearCookie('refreshToken');
     res.sendStatus(204);
+    return;
   } catch (error) {
     next(error);
+    return;
   }
 };
 
-// “me” now gets a fully-typed request
-export const me = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  // `jwtMiddleware` guarantees `req.user` is AccessTokenPayload
-  const userRecord = await UserModel.findUserById(req.user.id);
-  res.json({
-    user: {
-      id:      userRecord.id,
-      username:userRecord.username,
-      email:   userRecord.email,
-    },
-  });
+export const me: RequestHandler = async (
+  req,
+  res,
+  next
+): Promise<void> => {
+  // Cast to our extended AuthenticatedRequest so TS knows about `user`
+  const authReq = req as AuthenticatedRequest;
+  try {
+    const userRecord = await UserModel.findUserById(authReq.user.id);
+    res.json({
+      user: {
+        id:       userRecord.id,
+        username: userRecord.username,
+        email:    userRecord.email,
+      },
+    });
+    return;
+  } catch (error) {
+    next(error);
+    return;
+  }
 };

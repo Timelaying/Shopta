@@ -113,13 +113,16 @@ export const logout: RequestHandler = async (req, res, next): Promise<void> => {
   }
 };
 
-export const me: RequestHandler = async (
-  req,
-  res,
-  next
-): Promise<void> => {
-  // Cast to our extended AuthenticatedRequest so TS knows about `user`
+export const me: RequestHandler = async (req, res, next): Promise<void> => {
+  // tell TS this is the extended Request
   const authReq = req as AuthenticatedRequest;
+
+  // runtime guard
+  if (!authReq.user) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return;
+  }
+
   try {
     const userRecord = await UserModel.findUserById(authReq.user.id);
     res.json({
@@ -129,9 +132,7 @@ export const me: RequestHandler = async (
         email:    userRecord.email,
       },
     });
-    return;
   } catch (error) {
     next(error);
-    return;
   }
 };

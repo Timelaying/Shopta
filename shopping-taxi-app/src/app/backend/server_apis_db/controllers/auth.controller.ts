@@ -1,3 +1,5 @@
+// src/controllers/auth.controller.ts
+
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import * as UserModel from '../models/users.model';
@@ -6,7 +8,9 @@ import {
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
+  AccessTokenPayload,
 } from '../utils/jwt';
+import { AuthenticatedRequest } from '../middleware/jwtMiddleware';
 
 export const register = async (
   req: Request,
@@ -14,14 +18,15 @@ export const register = async (
   next: NextFunction
 ) => {
   const { username, email, password } = req.body;
-  if (!username || !email || !password)
+  if (!username || !email || !password) {
     return res.status(400).json({ error: 'Missing fields' });
+  }
   try {
     const hashed = await bcrypt.hash(password, 10);
     const user = await UserModel.createUser(username, email, hashed);
     res.status(201).json({ user });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -31,13 +36,18 @@ export const login = async (
   next: NextFunction
 ) => {
   const { email, password } = req.body;
-  if (!email || !password)
+  if (!email || !password) {
     return res.status(400).json({ error: 'Missing fields' });
+  }
   try {
     const user = await UserModel.findUserByEmail(email);
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const payload = { id: user.id, username: user.username };
     const accessToken = signAccessToken(payload);
@@ -51,22 +61,26 @@ export const login = async (
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
     res.json({ accessToken });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
 export const refresh = async (
   req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+  res: Response) => {
   const token = req.cookies.refreshToken;
-  if (!token) return res.status(401).json({ error: 'No refresh token' });
+  if (!token) {
+    return res.status(401).json({ error: 'No refresh token' });
+  }
   try {
-    const decoded: any = verifyRefreshToken(token);
+    // explicitly type the decoded payload
+    const decoded = verifyRefreshToken(token) as AccessTokenPayload;
+
     const valid = await TokenModel.isTokenValid(decoded.id, token);
-    if (!valid) return res.status(401).json({ error: 'Invalid refresh token' });
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid refresh token' });
+    }
 
     const payload = { id: decoded.id, username: decoded.username };
     const accessToken = signAccessToken(payload);
@@ -80,8 +94,8 @@ export const refresh = async (
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
     res.json({ accessToken });
-  } catch (err) {
-    next(err);
+  } catch {
+    return res.status(401).json({ error: 'Invalid token' });
   }
 };
 
@@ -92,15 +106,28 @@ export const logout = async (
 ) => {
   const token = req.cookies.refreshToken;
   try {
-    if (token) await TokenModel.deleteToken(token);
+    if (token) {
+      await TokenModel.deleteToken(token);
+    }
     res.clearCookie('refreshToken');
-    res.status(204).end();
-  } catch (err) {
-    next(err);
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const me = async (req: any, res: Response) => {
-  const user = await UserModel.findUserById(req.user.id);
-  res.json({ user: { id: user.id, username: user.username, email: user.email } });
+// “me” now gets a fully-typed request
+export const me = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  // `jwtMiddleware` guarantees `req.user` is AccessTokenPayload
+  const userRecord = await UserModel.findUserById(req.user.id);
+  res.json({
+    user: {
+      id:      userRecord.id,
+      username:userRecord.username,
+      email:   userRecord.email,
+    },
+  });
 };

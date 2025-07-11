@@ -1,22 +1,39 @@
-import jwt from 'jsonwebtoken';
+// src/utils/jwt.ts
+import * as jwt from 'jsonwebtoken';
 import jwtConfig from '../config/jwtConfig';
 
-export const signAccessToken = (payload: object) =>
-  jwt.sign(
+export const signAccessToken = (payload: object): string => {
+  const options: jwt.SignOptions = {
+    expiresIn: jwtConfig.accessTokenExpiresIn,
+  };
+  return jwt.sign(
     payload,
     jwtConfig.accessTokenSecret as jwt.Secret,
-    { expiresIn: jwtConfig.accessTokenExpiresIn }
+    options
   );
+};
 
-export const signRefreshToken = (payload: object) =>
-  jwt.sign(
+export const signRefreshToken = (payload: object): string => {
+  const options: jwt.SignOptions = {
+    expiresIn: jwtConfig.refreshTokenExpiresIn,
+  };
+  return jwt.sign(
     payload,
     jwtConfig.refreshTokenSecret as jwt.Secret,
-    { expiresIn: jwtConfig.refreshTokenExpiresIn }
+    options
   );
+};
 
-export const verifyAccessToken = (token: string) =>
-  jwt.verify(token, jwtConfig.accessTokenSecret as jwt.Secret);
+export const verifyAccessToken = (token: string): string | object => {
+  return jwt.verify(
+    token,
+    jwtConfig.accessTokenSecret as jwt.Secret
+  );
+};
 
-export const verifyRefreshToken = (token: string) =>
-  jwt.verify(token, jwtConfig.refreshTokenSecret as jwt.Secret);
+export const verifyRefreshToken = (token: string): string | object => {
+  return jwt.verify(
+    token,
+    jwtConfig.refreshTokenSecret as jwt.Secret
+  );
+};

@@ -1,30 +1,27 @@
 // src/middleware/jwtMiddleware.ts
-import { Request, Response, NextFunction } from 'express';
+
+import { RequestHandler } from 'express';
 import { verifyAccessToken, AccessTokenPayload } from '../utils/jwt';
 
-// Extend Express’s Request to carry our typed payload
-export interface AuthenticatedRequest extends Request {
-  user: AccessTokenPayload;
+// Make `user` optional so `Request` already fits (no overlap error)
+export interface AuthenticatedRequest extends Express.Request {
+  user?: AccessTokenPayload;
 }
 
-export const jwtMiddleware = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const jwtMiddleware: RequestHandler = (req, res, next): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided' });
+    res.status(401).json({ error: 'No token provided' });
+    return;
   }
 
   const token = authHeader.split(' ')[1];
   try {
-    // decode as our specific payload type
-    const decoded = verifyAccessToken(token);
-    req.user = decoded;
+    const decoded = verifyAccessToken(token) as AccessTokenPayload;
+    // Now req already has an optional `user`, so this cast is safe
+    (req as AuthenticatedRequest).user = decoded;
     next();
-  } catch (err) {
-    console.error(err);
-    return res.status(401).json({ error: 'Invalid token' });
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
   }
 };

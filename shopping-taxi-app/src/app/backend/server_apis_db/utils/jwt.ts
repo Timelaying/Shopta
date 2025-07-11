@@ -1,4 +1,5 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
+
 import jwtConfig from '../config/jwtConfig';
 
 export const signAccessToken = (payload: object) =>

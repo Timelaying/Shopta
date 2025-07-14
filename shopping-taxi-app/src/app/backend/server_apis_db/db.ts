@@ -32,7 +32,7 @@ export const initializeDatabase = async (): Promise<void> => {
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         token VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(user_id, token)
       );
     `);

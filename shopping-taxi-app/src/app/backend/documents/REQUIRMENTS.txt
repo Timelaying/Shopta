@@ -145,6 +145,25 @@ project-root/
 
 ---
 
+🧠 Phase 4.5: AI-Powered Optimization (Python)
+ Build a Python microservice that:
+
+Takes selected stores, time estimates, and location.
+
+Suggests the most efficient route based on:
+
+Proximity
+
+Store type priority
+
+Estimated traffic
+
+Exposes this as a REST API to the main backend.
+
+ Optional: Integrate with Google Maps Directions API for accuracy.
+
+
+
 ### 📦 Phase 5: Deployment & CI/CD
 
 * [ ] Dockerize frontend/backend

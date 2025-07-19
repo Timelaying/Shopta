@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import axios from 'axios';                     // or import your apiClient
+import apiClient from '@/app/services/apiClient'; // or axios if you prefer
 import { z } from 'zod';
 
-// 1) Define a Zod schema for registration
+// 1) Zod schema for client-side validation
 const RegisterSchema = z
   .object({
-    email: z.string().email('Invalid email address'),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    email: z.string().email('Must be a valid email'),
+    username: z.string().min(3, 'At least 3 characters'),
+    password: z.string().min(6, 'At least 6 characters'),
     confirmPassword: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((d) => d.password === d.confirmPassword, {
     message: 'Passwords must match',
     path: ['confirmPassword'],
   });
@@ -31,27 +31,26 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
-    // 2) Validate with Zod
+    // 2) Validate
     const result = RegisterSchema.safeParse(form);
     if (!result.success) {
-      // show first validation error
       setError(result.error.errors[0].message);
       return;
     }
 
     try {
-      // 3) Use Axios to call your backend
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+      // 3) Call your backend
+      await apiClient.post(
+        '/auth/register',
         {
           email: form.email,
           username: form.username,
@@ -59,13 +58,20 @@ export default function RegisterPage() {
         },
         { withCredentials: true }
       );
+
       router.push('/Feed');
-    } catch (err: any) {
-      // network or server error
-      setError(
-        err.response?.data?.error ||
-          'Registration failed. Please try again later.'
-      );
+    } catch (err: unknown) {
+      // 4) Narrow and display error
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        (err as any).response?.data?.error
+      ) {
+        setError((err as any).response.data.error);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
 

@@ -1,22 +1,22 @@
 'use client';
-
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import apiClient from '@/app/services/apiClient'; // or axios if you prefer
+import apiClient from '@/app/services/apiClient';
 import { z } from 'zod';
+import { AxiosError, isAxiosError } from 'axios';
 
-// 1) Zod schema for client-side validation
+// Zod schema for registration form
 const RegisterSchema = z
   .object({
-    email: z.string().email('Must be a valid email'),
-    username: z.string().min(3, 'At least 3 characters'),
-    password: z.string().min(6, 'At least 6 characters'),
+    email: z.string().email('Invalid email address'),
+    username: z.string().min(3, 'Username must be at least 3 characters'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
   })
-  .refine((d) => d.password === d.confirmPassword, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords must match',
     path: ['confirmPassword'],
   });
@@ -32,7 +32,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError(null);
   };
 
@@ -40,15 +40,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    // 2) Validate
-    const result = RegisterSchema.safeParse(form);
-    if (!result.success) {
-      setError(result.error.errors[0].message);
+    // Validate form data
+    const validation = RegisterSchema.safeParse(form);
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
       return;
     }
 
     try {
-      // 3) Call your backend
       await apiClient.post(
         '/auth/register',
         {
@@ -58,17 +57,12 @@ export default function RegisterPage() {
         },
         { withCredentials: true }
       );
-
       router.push('/Feed');
     } catch (err: unknown) {
-      // 4) Narrow and display error
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        (err as any).response?.data?.error
-      ) {
-        setError((err as any).response.data.error);
+      // Properly narrow Axios errors without using `any`
+      if (isAxiosError(err)) {
+        const axiosErr = err as AxiosError<{ error: string }>;
+        setError(axiosErr.response?.data.error ?? 'Registration failed.');
       } else {
         setError('Registration failed. Please try again.');
       }
@@ -78,10 +72,7 @@ export default function RegisterPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-6 bg-white p-8 shadow-md rounded-xl">
-        <h2 className="text-center text-2xl font-bold">
-          Create your account
-        </h2>
-
+        <h2 className="text-center text-2xl font-bold">Create your account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             name="email"
@@ -122,13 +113,9 @@ export default function RegisterPage() {
             Register
           </Button>
         </form>
-
         <p className="text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link
-            href="/Auth/Login"
-            className="text-blue-600 hover:underline"
-          >
+          <Link href="/Auth/Login" className="text-blue-600 hover:underline">
             Log in
           </Link>
         </p>

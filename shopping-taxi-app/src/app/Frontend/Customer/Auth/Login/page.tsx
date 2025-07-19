@@ -78,10 +78,16 @@ export default function LoginPage() {
             Log In
           </Button>
         </form>
-        <p className="text-center text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
+                <p className="text-center text-sm text-gray-600 space-x-2">
+          <span>Don&apos;t have an account?</span>
           <Link href="/Auth/Register" className="text-blue-600 hover:underline">
             Register
+          </Link>
+        </p>
+        <p className="text-center text-sm text-gray-600 space-x-2">
+          <span>Are you a driver?</span>
+          <Link href="/Driver/Auth/Login" className="text-blue-600 hover:underline">
+            Driver Login
           </Link>
         </p>
       </div>

@@ -1,9 +1,14 @@
 import pool from '../db';
 
-export const createUser = async (username: string, email: string, password: string) => {
+export const createUser = async (
+  username: string,
+  email: string,
+  password: string,
+  role: string = 'customer'
+) => {
   const result = await pool.query(
-    'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
-    [username, email, password]
+    'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
+    [username, email, password, role]
   );
   return result.rows[0];
 };

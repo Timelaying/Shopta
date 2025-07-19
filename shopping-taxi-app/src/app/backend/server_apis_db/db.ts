@@ -8,7 +8,9 @@ const pool = new Pool({
   database: config.db.name,
   password: config.db.password,
   port: config.db.port,
-  ...(config.db.connectionString ? { connectionString: config.db.connectionString } : {}),
+  ...(config.db.connectionString
+    ? { connectionString: config.db.connectionString }
+    : {}),
 });
 
 export const initializeDatabase = async (): Promise<void> => {
@@ -17,16 +19,25 @@ export const initializeDatabase = async (): Promise<void> => {
     console.log('⏳ Connecting to the database...');
     await client.query('BEGIN');
 
+    // Users table with role
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) NOT NULL DEFAULT 'customer',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
+    // In case users table existed before, add role column if missing
+    await client.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer';
+    `);
+
+    // Refresh tokens
     await client.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id SERIAL PRIMARY KEY,
@@ -37,6 +48,7 @@ export const initializeDatabase = async (): Promise<void> => {
       );
     `);
 
+    // ... rest of your tables
     await client.query(`
       CREATE TABLE IF NOT EXISTS stores (
         id SERIAL PRIMARY KEY,
@@ -87,7 +99,7 @@ export const initializeDatabase = async (): Promise<void> => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('❌ Failed to initialize database:', err);
-    throw err; // bubble up the error so server doesn't start silently
+    throw err;
   } finally {
     client.release();
   }

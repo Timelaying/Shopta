@@ -136,3 +136,27 @@ export const me: RequestHandler = async (req, res, next): Promise<void> => {
     next(error);
   }
 };
+
+// Driver registration
+export const driverRegister = async (req: Request, res: Response, next: NextFunction) => {
+  const { username, email, password } = req.body;
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    const driver = await UserModel.createUser(username, email, hashed, 'driver');
+    res.status(201).json({ user: driver });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Admin registration
+export const adminRegister = async (req: Request, res: Response, next: NextFunction) => {
+  const { username, email, password } = req.body;
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    const admin = await UserModel.createUser(username, email, hashed, 'admin');
+    res.status(201).json({ user: admin });
+  } catch (err) {
+    next(err);
+  }
+};

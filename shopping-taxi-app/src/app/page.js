@@ -16,7 +16,7 @@ export default function LandingPage() {
           <Link href="/Frontend/Auth/Login">
             <Button size="lg">Login</Button>
           </Link>
-          <Link href="/Frontend/Auth/Register">
+          <Link href="/Frontend/Customer/Auth/Register">
             <Button size="lg" variant="outline">Register</Button>
           </Link>
         </div>

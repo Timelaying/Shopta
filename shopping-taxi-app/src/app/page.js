@@ -13,7 +13,7 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link href="/Frontend/Auth/Login">
+          <Link href="/Frontend/Customer/Auth/Login">
             <Button size="lg">Login</Button>
           </Link>
           <Link href="/Frontend/Customer/Auth/Register">

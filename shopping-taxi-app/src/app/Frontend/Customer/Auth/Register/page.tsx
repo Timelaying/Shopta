@@ -115,13 +115,13 @@ export default function RegisterPage() {
         </form>
                <p className="text-center text-sm text-gray-600 space-x-2">
           <span>Already have an account?</span>
-          <Link href="/Auth/Login" className="text-blue-600 hover:underline">
+          <Link href="/Frontend/Auth/Login" className="text-blue-600 hover:underline">
             Log in
           </Link>
         </p>
         <p className="text-center text-sm text-gray-600 space-x-2">
           <span>Are you a driver?</span>
-          <Link href="/Driver/Auth/Register" className="text-blue-600 hover:underline">
+          <Link href="/Frontend/Driver/Auth/Register" className="text-blue-600 hover:underline">
             Register as Driver
           </Link>
         </p>

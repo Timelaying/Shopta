@@ -57,7 +57,7 @@ export default function RegisterPage() {
         },
         { withCredentials: true }
       );
-      router.push('/Feed');
+      router.push("Frontend/Customer/Feed");
     } catch (err: unknown) {
       // Properly narrow Axios errors without using `any`
       if (isAxiosError(err)) {

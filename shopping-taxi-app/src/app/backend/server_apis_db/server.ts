@@ -55,17 +55,14 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Start server using startServer utility
-startServer(app, config.port);
-
-// Initialize database connection
-// This should be called before starting the server to ensure DB is ready
+// 5. Only call startServer **once**, after DB init
 const boot = async () => {
   try {
-    await initializeDatabase(); // 🔧 Important: Wait for DB setup before running server
+    await initializeDatabase(); // Initialize database connection
     startServer(app, config.port);
   } catch (error) {
-    console.error('❌ Failed to start server due to database error.', error);
-    process.exit(1); // Exit with failure status
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
   }
 };
 

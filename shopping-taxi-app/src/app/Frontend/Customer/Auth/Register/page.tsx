@@ -1,3 +1,4 @@
+// src/app/Frontend/Customer/Auth/Register/page.tsx
 'use client';
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,61 +9,55 @@ import apiClient from '@/app/services/apiClient';
 import { z } from 'zod';
 import { AxiosError, isAxiosError } from 'axios';
 
-// Zod schema for registration form
 const RegisterSchema = z
   .object({
-    email: z.string().email('Invalid email address'),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    email: z.string().email(),
+    username: z.string().min(3),
+    password: z.string().min(6),
     confirmPassword: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((d) => d.password === d.confirmPassword, {
     message: 'Passwords must match',
     path: ['confirmPassword'],
   });
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({
-    email: '',
-    username: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [form, setForm] = useState({ email: '', username: '', password: '', confirmPassword: '' });
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<'idle' | 'registering' | 'success'>('idle');
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
     setError(null);
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Validate form data
     const validation = RegisterSchema.safeParse(form);
     if (!validation.success) {
       setError(validation.error.errors[0].message);
       return;
     }
 
+    setStatus('registering');                // 6. show busy state
     try {
-      await apiClient.post(
+      const res = await apiClient.post(
         '/auth/register',
-        {
-          email: form.email,
-          username: form.username,
-          password: form.password,
-        },
+        { email: form.email, username: form.username, password: form.password },
         { withCredentials: true }
       );
-      router.push("Frontend/Customer/Feed");
+      setStatus('success');
+      // 6. let user know success
+      // 7. Redirect after a short pause
+      setTimeout(() => router.push('/Frontend/Customer/Auth/Login'), 1000);
     } catch (err: unknown) {
-      // Properly narrow Axios errors without using `any`
+      setStatus('idle');
       if (isAxiosError(err)) {
-        const axiosErr = err as AxiosError<{ error: string }>;
-        setError(axiosErr.response?.data.error ?? 'Registration failed.');
+        const data = (err as AxiosError<{ error: string }>).response?.data;
+        setError(data?.error ?? 'Registration failed.');
       } else {
         setError('Registration failed. Please try again.');
       }
@@ -108,12 +103,12 @@ export default function RegisterPage() {
           />
 
           {error && <p className="text-sm text-red-500">{error}</p>}
-
-          <Button type="submit" className="w-full">
-            Register
+          {status === 'success' && <p className="text-green-600">Registered! Redirecting to login…</p>}
+          <Button type="submit" disabled={status === 'registering'} className="w-full">
+            {status === 'registering' ? 'Registering…' : 'Register'}
           </Button>
         </form>
-               <p className="text-center text-sm text-gray-600 space-x-2">
+        <p className="text-center text-sm text-gray-600 space-x-2">
           <span>Already have an account?</span>
           <Link href="/Frontend/Customer/Auth/Login" className="text-blue-600 hover:underline">
             Log in

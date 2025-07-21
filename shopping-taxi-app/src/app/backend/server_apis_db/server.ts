@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
 import { jwtMiddleware } from './middleware/jwtMiddleware';
 
-// imports fro routes 
+// imports for routes 
 import userRoutes from './routes/users.routes';
 import storeRoutes from './routes/stores.routes';
 import itemRoutes from './routes/items.routes';

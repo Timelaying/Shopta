@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import apiClient from '@/app/services/apiClient';
 import { z } from 'zod';
-import { AxiosError, isAxiosError } from 'axios';
+import axios, { AxiosError, isAxiosError } from 'axios';
 
 const RegisterSchema = z
   .object({
@@ -44,7 +43,7 @@ export default function RegisterPage() {
 
     setStatus('registering');                // 6. show busy state
     try {
-      await apiClient.post(
+      await axios.post(
         "http://localhost:5001/api/users",
         { email: form.email, username: form.username, password: form.password },
         { withCredentials: true }

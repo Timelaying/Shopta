@@ -51,7 +51,7 @@ export default function RegisterPage() {
       setStatus('success');
       // 6. let user know success
       // 7. Redirect after a short pause
-      setTimeout(() => router.push('/Frontend/Customer/Auth/Login'), 1000);
+      setTimeout(() => router.push("/Frontend/Customer/Auth/Login"), 1000);
     } catch (err: unknown) {
       setStatus('idle');
       if (isAxiosError(err)) {

@@ -1,4 +1,8 @@
+// src/models/users.model.ts
 import pool from '../db';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
 
 export const createUser = async (
   username: string,
@@ -6,10 +10,15 @@ export const createUser = async (
   password: string,
   role: string = 'customer'
 ) => {
+  // 1. Hash & salt the password
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
   const result = await pool.query(
-    'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
-    [username, email, password, role]
+    'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role, created_at',
+    [username, email, hashedPassword, role]
   );
+
+  // We return only the safe fields (no password)
   return result.rows[0];
 };
 
@@ -19,7 +28,7 @@ export const findUserByEmail = async (email: string) => {
 };
 
 export const findUserById = async (id: number) => {
-  const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+  const result = await pool.query('SELECT id, username, email, role, created_at FROM users WHERE id = $1', [id]);
   return result.rows[0];
 };
 

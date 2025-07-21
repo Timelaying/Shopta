@@ -45,7 +45,7 @@ export default function RegisterPage() {
     setStatus('registering');                // 6. show busy state
     try {
       await apiClient.post(
-        '/auth/register',
+        'http://localhost:5000/api/users/auth/register',
         { email: form.email, username: form.username, password: form.password },
         { withCredentials: true }
       );

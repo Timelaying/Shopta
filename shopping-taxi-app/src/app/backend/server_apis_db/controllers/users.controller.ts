@@ -1,3 +1,4 @@
+// src/controllers/users.controller.ts
 import { Request, Response, NextFunction } from 'express';
 import * as UserModel from '../models/users.model';
 
@@ -14,11 +15,20 @@ export const createUser = async (
 
   try {
     const user = await UserModel.createUser(username, email, password);
-    res.status(201).json(user);
-  } catch (err) {
-    next(err);
+    // 6. Let the user know registration succeeded
+    res.status(201).json({ message: 'Registration successful', user });
+  } catch (err: unknown) {
+    // 3. Handle duplicate-key (unique violation) errors
+    type PgError = { code?: string; constraint?: string };
+    if (typeof err === 'object' && err !== null && 'code' in err && (err as PgError).code === '23505') {
+      // Could inspect err.constraint to distinguish username vs email
+      res.status(409).json({ error: 'Username or email already in use' });
+    } else {
+      next(err);
+    }
   }
 };
+
 
 export const getUser = async (
   req: Request,

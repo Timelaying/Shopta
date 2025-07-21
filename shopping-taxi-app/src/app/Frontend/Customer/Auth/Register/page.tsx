@@ -44,7 +44,7 @@ export default function RegisterPage() {
 
     setStatus('registering');                // 6. show busy state
     try {
-      const res = await apiClient.post(
+      await apiClient.post(
         '/auth/register',
         { email: form.email, username: form.username, password: form.password },
         { withCredentials: true }

@@ -2,19 +2,19 @@
 'use client';
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input }  from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import Link       from 'next/link';
+import Link from 'next/link';
 import axios, { isAxiosError } from 'axios';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
-  email:    z.string().email(),
+  email: z.string().email(),
   password: z.string().min(1),
 });
 
 export default function LoginPage() {
-  const [form,  setForm]  = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading'>('idle');
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white p-8 shadow-md rounded-xl space-y-6">
         <h2 className="text-center text-2xl font-bold">Log in</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input name="email"    type="email"    placeholder="Email"    value={form.email}    onChange={handleChange} required />
+          <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
           <Input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required />
 
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -68,9 +68,9 @@ export default function LoginPage() {
             {status === 'loading' ? 'Logging in…' : 'Log In'}
           </Button>
         </form>
-                <p className="text-center text-sm text-gray-600 space-x-2">
+        <p className="text-center text-sm text-gray-600 space-x-2">
           <span>Don&apos;t have an account?</span>
-          <Link href="Fronten/Customer/Auth/Register" className="text-blue-600 hover:underline">
+          <Link href="/Frontend/Customer/Auth/Register" className="text-blue-600 hover:underline">
             Register
           </Link>
         </p>

@@ -11,20 +11,18 @@ import {
 } from '../utils/jwt';
 import { AuthenticatedRequest } from '../middleware/jwtMiddleware';
 
-export const register: RequestHandler = async (req, res, next): Promise<void> => {
+export const register: RequestHandler = async (req, res, next) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
     res.status(400).json({ error: 'Missing fields' });
     return;
   }
   try {
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await UserModel.createUser(username, email, hashed);
-    res.status(201).json({ user });
-    return;
-  } catch (error) {
-    next(error);
-    return;
+    // PASS RAW password — the model will hash it once
+    const user = await UserModel.createUser(username, email, password);
+    res.status(201).json({ message: 'Registration successful', user });
+  } catch (err) {
+    next(err);
   }
 };
 

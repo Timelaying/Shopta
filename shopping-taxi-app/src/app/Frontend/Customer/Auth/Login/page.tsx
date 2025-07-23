@@ -6,7 +6,7 @@ import { Input }  from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link       from 'next/link';
 import apiClient  from '@/app/services/apiClient';
-import { isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
@@ -37,8 +37,8 @@ export default function LoginPage() {
 
     setStatus('loading');
     try {
-      const res = await apiClient.post(
-        '/auth/login',
+      const res = await axios.post(
+        "http://localhost:5001/api/auth/login",
         { email: form.email, password: form.password },
         { withCredentials: true }
       );

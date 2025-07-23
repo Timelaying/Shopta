@@ -44,7 +44,7 @@ export default function RegisterPage() {
     setStatus('registering');                // 6. show busy state
     try {
       await axios.post(
-        "http://localhost:5001/api/users",
+        "http://localhost:5001/api/auth/register", // Adjust the URL to your backend endpoint
         { email: form.email, username: form.username, password: form.password },
         { withCredentials: true }
       );

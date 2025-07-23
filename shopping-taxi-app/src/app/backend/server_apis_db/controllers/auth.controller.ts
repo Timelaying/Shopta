@@ -45,21 +45,21 @@ export const login: RequestHandler = async (req, res, next): Promise<void> => {
     }
 
     const payload = { id: user.id, username: user.username };
-    const accessToken = signAccessToken(payload);
+    const accessToken  = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
     await TokenModel.saveToken(user.id, refreshToken);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',  // only true in prod
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
+
     res.json({ accessToken });
-    return;
-  } catch (error) {
-    next(error);
-    return;
+  } catch (err) {
+    console.error('[login] error:', err);
+    return next(err);
   }
 };
 

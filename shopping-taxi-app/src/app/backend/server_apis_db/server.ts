@@ -21,7 +21,11 @@ import tripItemRoutes from './routes/tripItems.routes';
 const app: Application = express();
 
 // Middleware
-app.use(cors());
+// server.ts — make sure this matches your actual frontend address:
+app.use(cors({
+  origin: 'http://localhost:3000',  // or https://app.your-domain.com
+  credentials: true,
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

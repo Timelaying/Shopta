@@ -41,7 +41,7 @@ export default function LoginPage() {
         { withCredentials: true }
       );
       localStorage.setItem('accessToken', res.data.accessToken);
-      router.push('/Feed');
+      router.push('Frontend/Customer/Feed');
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         const axiosErr = err as AxiosError<{ error: string }>;

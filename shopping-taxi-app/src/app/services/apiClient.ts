@@ -3,7 +3,7 @@ import { isTokenExpired } from '@/app/utils/jwt';
 import { authService } from './authService';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
   withCredentials: true,
 });
 

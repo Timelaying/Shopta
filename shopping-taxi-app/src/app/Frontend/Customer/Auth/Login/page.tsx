@@ -1,39 +1,41 @@
+// src/app/Frontend/Customer/Auth/Login/page.tsx
 'use client';
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
+import { Input }  from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import apiClient from '@/app/services/apiClient';
-import { AxiosError, isAxiosError } from 'axios';
+import Link       from 'next/link';
+import apiClient  from '@/app/services/apiClient';
+import { isAxiosError } from 'axios';
 import { z } from 'zod';
 
-// Zod schema for login form
 const LoginSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password is required'),
+  email:    z.string().email(),
+  password: z.string().min(1),
 });
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form,  setForm]  = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<'idle' | 'loading'>('idle');
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
     setError(null);
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const validation = LoginSchema.safeParse(form);
-    if (!validation.success) {
-      setError(validation.error.errors[0].message);
+    const v = LoginSchema.safeParse(form);
+    if (!v.success) {
+      setError(v.error.errors[0].message);
       return;
     }
 
+    setStatus('loading');
     try {
       const res = await apiClient.post(
         '/auth/login',
@@ -41,11 +43,12 @@ export default function LoginPage() {
         { withCredentials: true }
       );
       localStorage.setItem('accessToken', res.data.accessToken);
-      router.push('Frontend/Customer/Feed');
+      // absolute path!
+      router.push('/Frontend/Customer/Feed');
     } catch (err: unknown) {
+      setStatus('idle');
       if (isAxiosError(err)) {
-        const axiosErr = err as AxiosError<{ error: string }>;
-        setError(axiosErr.response?.data.error ?? 'Login failed.');
+        setError(err.response?.data.error ?? 'Login failed.');
       } else {
         setError('Login failed. Please try again.');
       }
@@ -54,28 +57,16 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-6 bg-white p-8 shadow-md rounded-xl">
-        <h2 className="text-center text-2xl font-bold">Log in to your account</h2>
+      <div className="w-full max-w-md bg-white p-8 shadow-md rounded-xl space-y-6">
+        <h2 className="text-center text-2xl font-bold">Log in</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <Input name="email"    type="email"    placeholder="Email"    value={form.email}    onChange={handleChange} required />
+          <Input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-full">
-            Log In
+
+          <Button type="submit" disabled={status === 'loading'} className="w-full">
+            {status === 'loading' ? 'Logging in…' : 'Log In'}
           </Button>
         </form>
                 <p className="text-center text-sm text-gray-600 space-x-2">

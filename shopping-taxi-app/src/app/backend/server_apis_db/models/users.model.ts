@@ -40,6 +40,11 @@ export const updateUser = async (id: number, username: string, email: string) =>
   return result.rows[0];
 };
 
+export const updatePassword = async (id: number, newHash: string) => {
+  await pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [newHash, id]);
+};
+
+
 export const deleteUser = async (id: number) => {
   await pool.query('DELETE FROM users WHERE id = $1', [id]);
 };

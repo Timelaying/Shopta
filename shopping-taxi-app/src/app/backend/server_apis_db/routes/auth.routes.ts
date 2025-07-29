@@ -1,5 +1,7 @@
 import express from 'express';
 import * as AuthController from '../controllers/auth.controller';
+import { jwtMiddleware } from '../middleware/jwtMiddleware';
+
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ router.post('/login', AuthController.login);
 router.post('/refresh', AuthController.refresh);
 router.post('/logout', AuthController.logout);
 
-// Protect only “me”
-router.get('/me', AuthController.me);
+// **Protected**
+router.get('/me', jwtMiddleware, AuthController.me);
 
 export default router;

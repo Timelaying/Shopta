@@ -24,7 +24,12 @@ export default function CustomerFeed() {
   const [filter, setFilter] = useState('');
   const router = useRouter();
 
-  // 1. Seed static store data once
+  // 1. Seed static store data once:- these are static stores not real stores
+  // In a real app, you would fetch this from an API
+  // Here we just simulate it with hardcoded data
+  // This could be replaced with a real API call to fetch stores
+  // For example, you might have an endpoint like /api/stores that returns a list
+  // of stores from your database.
   useEffect(() => {
     setStores([
       { id: 1, name: 'Alpha Groceries', address: '123 Main St' },

@@ -3,7 +3,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import apiClient from '@/app/services/apiClient';
-import Map from '@/components/Map';
+import Map from '@app/copm'
 
 export default function StoreDetail() {
   const { id } = useParams();

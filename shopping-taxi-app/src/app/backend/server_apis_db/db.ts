@@ -1,6 +1,6 @@
 // db.ts
-import { Pool } from 'pg';
-import config from './config/config';
+import { Pool } from "pg";
+import config from "./config/config";
 
 const pool = new Pool({
   user: config.db.user,
@@ -16,8 +16,8 @@ const pool = new Pool({
 export const initializeDatabase = async (): Promise<void> => {
   const client = await pool.connect();
   try {
-    console.log('⏳ Connecting to the database...');
-    await client.query('BEGIN');
+    console.log("⏳ Connecting to the database...");
+    await client.query("BEGIN");
 
     // Users table with role
     await client.query(`
@@ -94,11 +94,21 @@ export const initializeDatabase = async (): Promise<void> => {
       );
     `);
 
-    await client.query('COMMIT');
-    console.log('✅ Database initialized successfully.');
+    await client.query(`   
+      CREATE TABLE trip_stops (
+        id SERIAL PRIMARY KEY,
+        trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
+        store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+        visited BOOLEAN DEFAULT FALSE,
+        sequence INTEGER NOT NULL
+      );
+    `);
+
+    await client.query("COMMIT");
+    console.log("✅ Database initialized successfully.");
   } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('❌ Failed to initialize database:', err);
+    await client.query("ROLLBACK");
+    console.error("❌ Failed to initialize database:", err);
     throw err;
   } finally {
     client.release();

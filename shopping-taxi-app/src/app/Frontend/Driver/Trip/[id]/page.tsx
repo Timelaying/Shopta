@@ -3,18 +3,32 @@
 import { useEffect, useState } from 'react';
 import apiClient from '@/app/services/apiClient';
 import { useRouter, useParams } from 'next/navigation';
-import Map from '@/components/Map';
+import Map from '@/app/components2/Map';
+import { Button } from '@/components/ui/button';
 
 export default function DriverTrip() {
   const { id } = useParams();
   const router = useRouter();
-  const [trip, setTrip] = useState<any>(null);
+  type Stop = {
+    id: number;
+    store_id: string;
+    lat: number;
+    lng: number;
+    visited: boolean;
+  };
+
+  type Trip = {
+    id: number;
+    stops: Stop[];
+  };
+
+  const [trip, setTrip] = useState<Trip | null>(null);
   useEffect(() => {
     apiClient.get(`/trips/${id}`, { withCredentials: true }).then(r => setTrip(r.data));
   }, [id]);
 
   if (!trip) return <p>Loading…</p>;
-  const nextStop = trip.stops.find((s:any) => !s.visited);
+  const nextStop = trip.stops.find(s => !s.visited);
   return (
     <main className="p-8">
       <h1>Trip #{trip.id}</h1>
@@ -25,7 +39,7 @@ export default function DriverTrip() {
           router.refresh();
         }}>Done @ Store</Button>
       )}
-      <Map coords={trip.stops.map((s:any,i:number)=>([s.lat, s.lng]))} />
+      <Map coords={trip.stops.map((s) => ([s.lat, s.lng]))} />
     </main>
   );
 }

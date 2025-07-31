@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import apiClient from '@/app/services/apiClient';
-import Map from '@/components/Map';
+import Map from '@/app/components2/Map';
 
 export default function AdminMapReady() {
   const params = useSearchParams();
@@ -11,7 +11,7 @@ export default function AdminMapReady() {
   const [coords, setCoords] = useState<[number,number][]>([]);
   useEffect(() => {
     apiClient.get(`/trips/${tripId}`, { withCredentials: true }).then(r => {
-      const c = r.data.stops.map((s:any)=>([s.lat,s.lng]));
+      const c = r.data.stops.map((s: { lat: number; lng: number }) => ([s.lat, s.lng]));
       setCoords(c);
     });
   }, [tripId]);

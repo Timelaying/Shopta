@@ -95,7 +95,7 @@ export const initializeDatabase = async (): Promise<void> => {
     `);
 
     await client.query(`   
-      CREATE TABLE trip_stops (
+      CREATE TABLE IF NOT EXISTS trip_stops (
         id SERIAL PRIMARY KEY,
         trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
         store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,

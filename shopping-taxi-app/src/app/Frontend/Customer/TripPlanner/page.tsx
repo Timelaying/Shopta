@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import apiClient from '@/app/services/apiClient';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface Store { id: number; name: string; address: string; }
 const STORES: Store[] = [
@@ -53,7 +54,7 @@ export default function TripPlanner() {
       {step === Step.Review && (
         <>  <h1>Review your route</h1>
           <ol className="list-decimal ml-6 space-y-2">
-            {selected.map((s, i) => <li key={s.id}>{s.name}</li>)}
+            {selected.map(s => <li key={s.id}>{s.name}</li>)}
           </ol>
           <Button onClick={() => setStep(Step.Confirm)}>Confirm</Button>
         </>

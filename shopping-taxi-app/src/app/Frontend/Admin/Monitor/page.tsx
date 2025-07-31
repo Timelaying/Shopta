@@ -3,9 +3,16 @@
 import { useEffect, useState } from 'react';
 import apiClient from '@/app/services/apiClient';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+
+type Trip = {
+  id: number;
+  user_id: number;
+  stops: { visited: boolean }[];
+};
 
 export default function AdminMonitor() {
-  const [trips, setTrips] = useState<any[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const router = useRouter();
   useEffect(() => {
     apiClient.get('/trips/admin', { withCredentials: true }).then(r => setTrips(r.data.trips));

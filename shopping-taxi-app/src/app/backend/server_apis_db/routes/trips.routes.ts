@@ -7,33 +7,33 @@ const router = Router();
 
 // Customer routes
 router.post(
-  '/',
-  jwtMiddleware,
-  TripCtrl.createTrip as RequestHandler
+    '/',
+    jwtMiddleware,
+    TripCtrl.createTrip as RequestHandler
 );
 router.get(
-  '/',
-  jwtMiddleware,
-  TripCtrl.getMyTrips as RequestHandler
+    '/',
+    jwtMiddleware,
+    TripCtrl.getMyTrips as RequestHandler
 );
 
 // Driver routes
 router.get(
-  '/driver',
-  jwtMiddleware,
-  TripCtrl.getDriverTrips as RequestHandler
+    '/driver',
+    jwtMiddleware,
+    TripCtrl.getDriverTrips as RequestHandler
 );
 router.patch(
-  '/stops/:stopId/done',
-  jwtMiddleware,
-  TripCtrl.completeStop as RequestHandler
+    '/stops/:stopId/done',
+    jwtMiddleware,
+    TripCtrl.completeStop as RequestHandler
 );
 
 // Admin routes
 router.get(
-  '/admin',
-  jwtMiddleware,
-  TripCtrl.adminGetTrips as RequestHandler
+    '/admin',
+    jwtMiddleware,
+    TripCtrl.adminGetTrips as RequestHandler
 );
 
 export default router;

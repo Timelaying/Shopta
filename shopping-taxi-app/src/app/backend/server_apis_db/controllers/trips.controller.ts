@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as TripModel from '../models/trips.model';
 
+
 // Extend Express Request interface to include 'user'
 import 'express';
 

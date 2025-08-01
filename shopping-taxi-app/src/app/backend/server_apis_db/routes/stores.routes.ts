@@ -1,9 +1,8 @@
 import express from 'express';
-import * as StoreController from '../controllers/stores.controller';
+import * as StoreCtrl from '../controllers/stores.controller';
+import { jwtMiddleware } from '../middleware/jwtMiddleware';
 
 const router = express.Router();
-
-router.post('/', StoreController.createStore);
-router.get('/', StoreController.getAllStores);
-
+router.get('/', jwtMiddleware, StoreCtrl.listStores);
+router.get('/:id', jwtMiddleware, StoreCtrl.getStore);
 export default router;

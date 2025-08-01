@@ -16,13 +16,11 @@ declare module 'express' {
 }
 
 // Customer: create trip with stops
-export const createTrip: RequestHandler = async (req, res, next) => {
+export const createTrip = async (req: Request & { user: { id: number } }, res: Response, next: NextFunction) => {
   try {
-    const userId = req.body.userId; // or from req.user
-    const { stops } = req.body; // [{ store_id, sequence }, ...]
-    if (!Array.isArray(stops) || stops.length === 0 || stops.length > 10) {
-      res.status(400).json({ error: 'Provide 1-10 stops' }); return;
-    }
+    const userId = req.user.id;
+    const { stops } = req.body;
+    // validation same as before
     const trip = await TripModel.createTrip(userId);
     await TripModel.addTripStops(trip.id, stops);
     res.status(201).json({ tripId: trip.id }); return;

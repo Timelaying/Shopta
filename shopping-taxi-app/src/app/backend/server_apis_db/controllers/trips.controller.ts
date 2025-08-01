@@ -16,11 +16,17 @@ declare module 'express' {
 }
 
 // Customer: create trip with stops
-export const createTrip = async (req: Request & { user: { id: number } }, res: Response, next: NextFunction) => {
+export const createTrip = async (
+  req: Request & { user: { id: number } },
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const userId = req.user.id;
-    const { stops } = req.body;
-    // validation same as before
+    const { stops, vehicleSize } = req.body; // vehicleSize from frontend
+    if (!['small','standard','large'].includes(vehicleSize)) {
+      res.status(400).json({ error: 'Invalid vehicle size' }); return;
+    }
     const trip = await TripModel.createTrip(userId);
     await TripModel.addTripStops(trip.id, stops);
     res.status(201).json({ tripId: trip.id }); return;

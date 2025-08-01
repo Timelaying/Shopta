@@ -1,16 +1,15 @@
-import express, { Application, Request, Response } from "express";
+import express, { Request, Response } from "express";
+import http from 'http';
+import { Server as IOServer } from 'socket.io';
 import cors from "cors";
 import morgan from "morgan";
-import routes from "./routes/index"; // Adjust path if needed
-import config from "./config/config";
-import startServer from "./startServer";
-import { initializeDatabase } from './db';
-import { notFound, errorHandler } from "./middleware/errorHandlers"; // Optional
 import cookieParser from 'cookie-parser';
+import routes from "./routes/index";
+import config from "./config/config";
+import { initializeDatabase } from './db';
+import { notFound, errorHandler } from "./middleware/errorHandlers";
 import authRoutes from './routes/auth.routes';
 import { jwtMiddleware } from './middleware/jwtMiddleware';
-
-// imports for routes 
 import userRoutes from './routes/users.routes';
 import storeRoutes from './routes/stores.routes';
 import itemRoutes from './routes/items.routes';
@@ -18,18 +17,28 @@ import storeItemRoutes from './routes/storeItems.routes';
 import tripRoutes from './routes/trips.routes';
 import tripItemRoutes from './routes/tripItems.routes';
 
-const app: Application = express();
+// If using Socket.IO types, ensure you have installed @types/socket.io
+// npm install socket.io @types/socket.io
+
+const app = express();
+const httpServer = http.createServer(app);
+
+// Ensure config.frontendUrl exists in your config file
+const frontendUrl = config.frontendUrl || 'http://localhost:3000';
+
+const io = new IOServer(httpServer, {
+  cors: { origin: frontendUrl, credentials: true }
+});
+
+// Attach io to app for controllers
+app.set('io', io);
 
 // Middleware
-// server.ts — make sure this matches your actual frontend address:
-app.use(cors({
-  origin: 'http://localhost:3000',  // or https://app.your-domain.com
-  credentials: true,
-}));
+app.use(cors({ origin: frontendUrl, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser()); // For parsing cookies
+app.use(cookieParser());
 
 // Health check
 app.get("/api/health", (_req: Request, res: Response) => {
@@ -38,7 +47,6 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 // API Routes
 app.use("/api", routes);
-
 
 // Auth routes (unprotected)
 app.use('/api/auth', authRoutes);
@@ -54,20 +62,34 @@ app.use('/api/store-items', storeItemRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/trip-items', tripItemRoutes);
 
-// 404 and error handlers
+// Error handlers
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server using startServer utility
-// 5. Only call startServer **once**, after DB init
+// Socket.IO events
+import { Socket } from 'socket.io';
+
+io.on('connection', (socket: Socket) => {
+  console.log('Client connected:', socket.id);
+  // Join trip room
+  socket.on('joinTrip', (tripId: string) => {
+    socket.join(`trip_${tripId}`);
+  });
+  socket.on('sendLocation', ({ tripId, lat, lng }: { tripId: string, lat: number, lng: number }) => {
+    io.to(`trip_${tripId}`).emit('locationUpdate', { tripId, lat, lng });
+  });
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
 const boot = async () => {
   try {
-    await initializeDatabase(); // Initialize database connection
-    startServer(app, config.port);
+    await initializeDatabase();
+    httpServer.listen(config.port, () => console.log(`Listening on ${config.port}`));
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
-
 boot();

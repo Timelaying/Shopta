@@ -62,6 +62,7 @@ interface AppConfig {
   port: number;
   db: DBConfig;
   baseUrl: string;
+  frontendUrl: string;
 }
 
 const config: AppConfig = {
@@ -74,6 +75,7 @@ const config: AppConfig = {
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   },
   baseUrl: process.env.BASE_URL ?? "http://localhost:5000",
+  frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
 };
 
 export default config;

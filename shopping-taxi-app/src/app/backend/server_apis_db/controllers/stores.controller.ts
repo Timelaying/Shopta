@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as StoreModel from '../models/stores.model';
 
 export const createStore = async (
@@ -31,4 +31,21 @@ export const getAllStores = async (
   } catch (err) {
     next(err);
   }
+};
+
+
+export const listStores: RequestHandler = async (req, res, next) => {
+  try {
+    const stores = await StoreModel.getAllStores();
+    res.json({ stores }); return;
+  } catch (err) { next(err); return; }
+};
+
+export const getStore: RequestHandler = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const store = await StoreModel.getStoreById(id);
+    if (!store) { res.status(404).json({ error: 'Store not found' }); return; }
+    res.json({ store }); return;
+  } catch (err) { next(err); return; }
 };

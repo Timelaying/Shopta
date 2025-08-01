@@ -27,7 +27,7 @@ export const createTrip = async (
     if (!['small','standard','large'].includes(vehicleSize)) {
       res.status(400).json({ error: 'Invalid vehicle size' }); return;
     }
-    const trip = await TripModel.createTrip(userId);
+    const trip = await TripModel.createTrip(userId, vehicleSize);
     await TripModel.addTripStops(trip.id, stops);
     res.status(201).json({ tripId: trip.id }); return;
   } catch (err) { next(err); return; }

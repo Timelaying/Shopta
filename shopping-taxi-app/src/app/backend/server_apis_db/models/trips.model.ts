@@ -3,12 +3,12 @@ import pool from '../db';
 export interface Trip { id: number; user_id: number; created_at: string; }
 export interface TripStop { id: number; trip_id: number; store_id: number; visited: boolean; sequence: number; }
 
-export const createTrip = async (userId: number): Promise<Trip> => {
-  const result = await pool.query(
-    'INSERT INTO trips (user_id) VALUES ($1) RETURNING *',
-    [userId]
+export const createTrip = async (userId: number, vehicleSize: string): Promise<Trip> => {
+  const { rows } = await pool.query(
+    'INSERT INTO trips (user_id, vehicle_size) VALUES ($1, $2) RETURNING *',
+    [userId, vehicleSize]
   );
-  return result.rows[0];
+  return rows[0];
 };
 
 export const addTripStops = async (

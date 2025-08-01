@@ -1,5 +1,23 @@
 import pool from '../db';
 
+export interface Store {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+}
+
+export const getAllStores = async (): Promise<Store[]> => {
+  const { rows } = await pool.query('SELECT * FROM stores ORDER BY name');
+  return rows;
+};
+
+export const getStoreById = async (id: number): Promise<Store | null> => {
+  const { rows } = await pool.query('SELECT * FROM stores WHERE id = $1', [id]);
+  return rows[0] || null;
+};
+
 export const createStore = async (name: string, address: string, latitude: number, longitude: number) => {
   const result = await pool.query(
     'INSERT INTO stores (name, address, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *',
@@ -8,10 +26,6 @@ export const createStore = async (name: string, address: string, latitude: numbe
   return result.rows[0];
 };
 
-export const getAllStores = async () => {
-  const result = await pool.query('SELECT * FROM stores');
-  return result.rows;
-};
 
 export const updateStore = async (id: number, name: string, address: string) => {
   const result = await pool.query(

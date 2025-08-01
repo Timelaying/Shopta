@@ -6,39 +6,30 @@ import apiClient from '@/app/services/apiClient';
 import StoreList from '@/app/components2/StoreList';
 import { useRouter } from 'next/navigation';
 
-interface User {
+type User = {
   id: number;
   username: string;
   email: string;
-}
+};
 
-interface Store {
+type Store = {
   id: number;
   name: string;
   address: string;
-}
+};
 
 export default function CustomerFeed() {
-  const [user, setUser] = useState<User | null>(null);
   const [stores, setStores] = useState<Store[]>([]);
   const [filter, setFilter] = useState('');
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  // 1. Seed static store data once:- these are static stores not real stores
-  // In a real app, you would fetch this from an API
-  // Here we just simulate it with hardcoded data
-  // This could be replaced with a real API call to fetch stores
-  // For example, you might have an endpoint like /api/stores that returns a list
-  // of stores from your database.
   useEffect(() => {
-    setStores([
-      { id: 1, name: 'Alpha Groceries', address: '123 Main St' },
-      { id: 2, name: 'Budget Market', address: '456 Elm St' },
-      // ... up to N
-    ]);
-  }, []);
+    apiClient.get('/stores', { withCredentials: true })
+      .then(r => setStores(r.data.stores))
+      .catch(() => router.push('/Frontend/Customer/Auth/Login'));
+  }, [router]);
 
-  // 2. Fetch the current user; redirect to login on error
   useEffect(() => {
     const fetchMe = async () => {
       try {
@@ -55,8 +46,7 @@ export default function CustomerFeed() {
     fetchMe();
   }, [router]);
 
-  // 3. Compute filtered list for rendering
-  const filteredStores = stores.filter((s) =>
+  const filtered = stores.filter((s) =>
     s.name.toLowerCase().includes(filter.toLowerCase())
   );
 
@@ -76,7 +66,7 @@ export default function CustomerFeed() {
       />
 
       <StoreList
-        stores={filteredStores}
+        stores={filtered}
         onSelect={(id) => router.push(`/Frontend/Customer/StoreDetail/${id}`)}
       />
     </main>

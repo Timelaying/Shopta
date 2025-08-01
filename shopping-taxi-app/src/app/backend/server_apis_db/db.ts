@@ -54,8 +54,8 @@ export const initializeDatabase = async (): Promise<void> => {
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         address TEXT NOT NULL,
-        latitude DECIMAL(9,6) NOT NULL,
-        longitude DECIMAL(9,6) NOT NULL
+        latitude DECIMAL(9,6) NOT NULL DEFAULT 0,
+        longitude DECIMAL(9,6) NOT NULL DEFAULT 0
       );
     `);
 

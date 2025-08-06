@@ -35,21 +35,22 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Overview
 
-
-
-
-Overview
 This repository contains a full‑stack application built with Next.js (App Router, TypeScript) and an Express + PostgreSQL backend.
-Directory highlights:
 
-Path	Purpose
-src/app	Next.js “app” directory with routes for landing, authentication, and role‑specific UIs.
-src/app/backend/server_apis_db	Express server, database models, controllers, routes, and middleware.
-src/components & src/lib	Reusable UI components (Shadcn UI) and utilities.
-src/app/context, hooks, services	Client‑side auth context, React hooks, and Axios API layer.
-Key Concepts & Flow
-Role‑based Frontend
+### Directory highlights
+
+| Path                                 | Purpose                                                                 |
+|-------------------------------------- |-------------------------------------------------------------------------|
+| src/app                              | Next.js “app” directory with routes for landing, authentication, and role‑specific UIs. |
+| src/app/backend/server_apis_db        | Express server, database models, controllers, routes, and middleware.    |
+| src/components & src/lib              | Reusable UI components (shadcn UI) and utilities.                       |
+| src/app/context, hooks, services      | Client‑side auth context, React hooks, and Axios API layer.              |
+
+### Key Concepts & Flow
+
+#### Role‑based Frontend
 
 Frontend/Customer, Frontend/Driver, and Frontend/Admin each hold Auth, Feed, and role‑specific pages (e.g., trip planning or monitoring).
 
@@ -99,9 +100,9 @@ Study how driver locations are emitted and consumed to drive real‑time maps.
 Mapping Libraries
 Compare the implementations of Google Maps (@react-google-maps/api) and Leaflet (react-leaflet) in components2.
 
-UI & Styling
-Explore Shadcn UI components (src/components/ui) and Tailwind CSS usage, as well as how components.json configures aliases.
+Explore shadcn UI components (src/components/ui) and Tailwind CSS usage, as well as how components.json configures aliases.
 
+### Next Steps
 Next Steps
 
 Set up a local PostgreSQL instance and configure .env variables for DB_* and JWT secrets.

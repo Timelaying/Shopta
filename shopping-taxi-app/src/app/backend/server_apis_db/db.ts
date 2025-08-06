@@ -95,13 +95,25 @@ export const initializeDatabase = async (): Promise<void> => {
       );
     `);
 
-    await client.query(`   
+    await client.query(`
       CREATE TABLE IF NOT EXISTS trip_stops (
         id SERIAL PRIMARY KEY,
         trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
         store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
         visited BOOLEAN DEFAULT FALSE,
         sequence INTEGER NOT NULL
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ratings (
+        id SERIAL PRIMARY KEY,
+        trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
+        target_type VARCHAR(10) NOT NULL,
+        target_id INTEGER NOT NULL,
+        rating INTEGER NOT NULL,
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
       );
     `);
 

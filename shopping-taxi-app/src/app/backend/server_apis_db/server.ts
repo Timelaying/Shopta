@@ -16,6 +16,7 @@ import itemRoutes from './routes/items.routes';
 import storeItemRoutes from './routes/storeItems.routes';
 import tripRoutes from './routes/trips.routes';
 import tripItemRoutes from './routes/tripItems.routes';
+import ratingRoutes from './routes/ratings.routes';
 
 // If using Socket.IO types, ensure you have installed @types/socket.io
 // npm install socket.io @types/socket.io
@@ -61,6 +62,7 @@ app.use('/api/items', itemRoutes);
 app.use('/api/store-items', storeItemRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/trip-items', tripItemRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // Error handlers
 app.use(notFound);

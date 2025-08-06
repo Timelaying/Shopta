@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as TripModel from '../models/trips.model';
+import { matchDriverToTrip, estimateArrival } from '../services/driver.service';
+import { sendNotification } from '../services/notification.service';
 
 
 // Extend Express Request interface to include 'user'
@@ -29,7 +31,9 @@ export const createTrip = async (
     }
     const trip = await TripModel.createTrip(userId, vehicleSize);
     await TripModel.addTripStops(trip.id, stops);
-    res.status(201).json({ tripId: trip.id }); return;
+    const driver = await matchDriverToTrip(trip.id);
+    const eta = driver ? await estimateArrival(driver.id, trip.id) : null;
+    res.status(201).json({ tripId: trip.id, driver, eta }); return;
   } catch (err) { next(err); return; }
 };
 
@@ -55,6 +59,10 @@ export const completeStop: RequestHandler = async (req, res, next) => {
   try {
     const stopId = parseInt(req.params.stopId, 10);
     const stop = await TripModel.markStopVisited(stopId);
+    const userId = (req as any).user?.id;
+    if (userId) {
+      await sendNotification(userId, `Stop ${stopId} completed`);
+    }
     res.json({ stop }); return;
   } catch (err) { next(err); return; }
 };

@@ -100,6 +100,7 @@ export const login: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    // Token payload carries the user's id and username
     const payload = { id: user.id, username: user.username };
     const accessToken  = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
@@ -124,6 +125,7 @@ export const refresh: RequestHandler = async (req, res) => {
   }
 
   try {
+    // Refresh token payload also contains the user's id and username
     const decoded = verifyRefreshToken(token) as AccessTokenPayload;
     const valid = await TokenModel.isTokenValid(decoded.id, token);
     if (!valid) {

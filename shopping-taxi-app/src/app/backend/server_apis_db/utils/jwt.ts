@@ -4,9 +4,9 @@ import ms, { StringValue } from 'ms';
 import jwtConfig from '../config/jwtConfig';
 
 export interface AccessTokenPayload extends jwt.JwtPayload {
-  // add any custom claims here, for example:
-  userId: string;
-  email: string;
+  // add any custom claims here, for example a user's id and username
+  id: string;
+  username: string;
 }
 
 export const signAccessToken = (payload: object): string => {

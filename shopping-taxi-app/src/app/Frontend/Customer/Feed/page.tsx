@@ -25,7 +25,8 @@ export default function CustomerFeed() {
   const router = useRouter();
 
   useEffect(() => {
-    apiClient.get('/stores', { withCredentials: true })
+    apiClient
+      .get('/stores')
       .then(r => setStores(r.data.stores))
       .catch(() => router.push('/Frontend/Customer/Auth/Login'));
   }, [router]);
@@ -33,11 +34,7 @@ export default function CustomerFeed() {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) throw new Error('No token');
-        const res = await apiClient.get('/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiClient.get('/auth/me');
         setUser(res.data.user);
       } catch {
         router.push('/Frontend/Customer/Auth/Login');

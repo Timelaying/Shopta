@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import apiClient from '@/app/services/apiClient';
 import { z } from 'zod';
 import { isAxiosError } from 'axios';
+import { useAuth } from '@/app/hooks/useAuth';
 
 const DriverLoginSchema = z.object({ email: z.string().email(), password: z.string().min(1) });
 
@@ -16,6 +16,7 @@ export default function DriverLogin() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading'>('idle');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => { setForm(p => ({ ...p, [e.target.name]: e.target.value })); setError(null); };
   const handleSubmit = async (e: FormEvent) => {
@@ -24,8 +25,7 @@ export default function DriverLogin() {
     if (!v.success) { setError(v.error.errors[0].message); return; }
     setStatus('loading');
     try {
-      const res = await apiClient.post('/auth/login', { email: form.email, password: form.password }, { withCredentials: true });
-      localStorage.setItem('accessToken', res.data.accessToken);
+      await login({ email: form.email, password: form.password });
       router.push('/Frontend/Driver/Feed');
     } catch (err: unknown) {
       setStatus('idle');

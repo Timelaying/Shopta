@@ -36,8 +36,7 @@ export default function DriverFeed() {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        const res = await apiClient.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await apiClient.get('/auth/me');
         if (res.data.user.role !== 'driver') throw new Error();
         setUser(res.data.user);
       } catch {
@@ -49,7 +48,7 @@ export default function DriverFeed() {
 
   useEffect(() => {
     if (user) {
-      apiClient.get('/trips/driver', { withCredentials: true }).then(r => setTrips(r.data.trips));
+      apiClient.get('/trips/driver').then(r => setTrips(r.data.trips));
     }
   }, [user]);
 

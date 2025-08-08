@@ -58,7 +58,7 @@ Components under components2 provide maps (GoogleMap, Map) and trip/store lists.
 
 Authentication & Authorization
 
-Frontend uses AuthProvider (src/app/context/AuthContext.tsx) and a useAuth hook to manage JWTs stored in localStorage.
+Frontend uses AuthProvider (src/app/context/AuthContext.tsx) and a useAuth hook to manage JWTs in memory, relying on refresh tokens stored in HTTP-only cookies.
 
 Axios instance (apiClient.ts) adds tokens to requests and auto‑refreshes when expired.
 

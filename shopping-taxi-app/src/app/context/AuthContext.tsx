@@ -1,10 +1,15 @@
 'use client';
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/app/services/authService';
-import { parseJwt } from '@/app/utils/jwt';
+import { parseJwt, JwtPayload } from '@/app/utils/jwt';
 
-interface AuthContextType {
-  user: unknown;
+export interface User extends JwtPayload {
+  id: number;
+  username: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
   login: (data: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -12,12 +17,12 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<unknown>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      const payload = parseJwt(token);
+      const payload = parseJwt(token) as User | null;
       setUser(payload);
     }
   }, []);
@@ -26,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const res = await authService.login(data);
     const accessToken = res.data.accessToken;
     localStorage.setItem('accessToken', accessToken);
-    const payload = parseJwt(accessToken);
+    const payload = parseJwt(accessToken) as User | null;
     setUser(payload);
   };
 

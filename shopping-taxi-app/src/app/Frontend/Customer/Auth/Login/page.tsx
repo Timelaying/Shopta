@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import axios, { isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 import { z } from 'zod';
+import { useAuth } from '@/app/hooks/useAuth';
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading'>('idle');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -36,13 +38,7 @@ export default function LoginPage() {
 
     setStatus('loading');
     try {
-      const res = await axios.post(
-        "http://localhost:5001/api/auth/login",
-        { email: form.email, password: form.password },
-        { withCredentials: true }
-      );
-      localStorage.setItem('accessToken', res.data.accessToken);
-      // absolute path!
+      await login({ email: form.email, password: form.password });
       router.push('/Frontend/Customer/Feed');
     } catch (err: unknown) {
       setStatus('idle');

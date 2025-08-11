@@ -55,11 +55,15 @@ export const getDriverTrips: RequestHandler = async (req, res, next) => {
 };
 
 // Driver: mark current stop done
-export const completeStop: RequestHandler = async (req, res, next) => {
+export const completeStop = async (
+  req: Request & { user?: { id: number } },
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const stopId = parseInt(req.params.stopId, 10);
     const stop = await TripModel.markStopVisited(stopId);
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
     if (userId) {
       await sendNotification(userId, `Stop ${stopId} completed`);
     }

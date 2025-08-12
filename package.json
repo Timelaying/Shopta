@@ -1,0 +1,18 @@
+{
+  "name": "shopta",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

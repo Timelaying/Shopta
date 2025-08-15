@@ -9,7 +9,8 @@ export default function LandingPage() {
           Plan Smarter Shopping, Travel Efficiently
         </h1>
         <p className="text-lg text-gray-700 mb-8">
-          A better way to combine shopping and commuting — save time, money, and energy.
+          A better way to combine shopping and commuting — save time, money, and
+          energy.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -17,7 +18,9 @@ export default function LandingPage() {
             <Button size="lg">Login</Button>
           </Link>
           <Link href="/Frontend/Customer/Auth/Register">
-            <Button size="lg" variant="outline">Register</Button>
+            <Button size="lg" variant="outline">
+              Register
+            </Button>
           </Link>
         </div>
       </div>

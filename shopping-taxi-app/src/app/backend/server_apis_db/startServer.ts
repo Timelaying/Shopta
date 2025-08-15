@@ -26,7 +26,9 @@ function startServer(app: Application, port: number, callback?: () => void) {
 
     currentServer.on("error", (error: any) => {
       if (error.code === "EADDRINUSE") {
-        console.error(`❌ Port ${port} is already in use. Please choose a different port.`);
+        console.error(
+          `❌ Port ${port} is already in use. Please choose a different port.`
+        );
       } else {
         console.error("❌ Server failed to start:", error);
       }

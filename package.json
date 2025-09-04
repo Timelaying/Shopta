@@ -5,7 +5,8 @@
   "scripts": {
     "test": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json node --experimental-test-module-mocks --import tsx --test",
     "lint": "eslint -c shopping-taxi-app/.eslintrc.cjs \"shopping-taxi-app/**/*.{ts,tsx,js,jsx}\"",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "start": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json tsx shopping-taxi-app/src/app/backend/server_apis_db/server.ts"
   },
   "dependencies": {
     "axios": "^1.6.7",

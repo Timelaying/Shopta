@@ -107,22 +107,22 @@ project-root/
 
 ### 🧱 Phase 1: Planning & Setup
 
-* [ ] Finalize feature set & app flow
-* [ ] Set up GitHub repository
+* [x] Finalize feature set & app flow
+* [x] Set up GitHub repository
 * [ ] Choose mobile framework (React Native or Flutter)
-* [ ] Design DB schema (users, trips, stops, etc.)
-* [ ] Configure backend (Node + TS + DB connection)
+* [x] Design DB schema (users, trips, stops, etc.)
+* [x] Configure backend (Node + TS + DB connection)
 
 ---
 
 ### 🚀 Phase 2: Core Features (MVP)
 
-* [ ] Auth for customers and drivers
+* [x] Auth for customers and drivers
 * [ ] Store search/filter (static seed data first)
-* [ ] Trip planning with 10 stops max
-* [ ] “Done @ Store” → move to next stop
-* [ ] Admin view to monitor trips
-* [ ] Live map tracking (static coordinates for MVP)
+* [x] Trip planning with 10 stops max
+* [x] “Done @ Store” → move to next stop
+* [x] Admin view to monitor trips
+* [x] Live map tracking (static coordinates for MVP)
 
 ---
 
@@ -130,7 +130,7 @@ project-root/
 
 * [ ] Google Maps integration
 * [ ] Store data from external APIs (e.g., Google Places)
-* [ ] Real-time taxi location via WebSockets
+* [x] Real-time taxi location via WebSockets
 * [ ] Vehicle size change logic
 * [ ] Stop edit limits based on current stop index
 
@@ -139,8 +139,8 @@ project-root/
 ### 🌐 Phase 4: Integration & Extras
 
 * [ ] Uber/Bolt SDK integration
-* [ ] Driver matching logic & ETA
-* [ ] Ratings system for drivers & stores
+* [x] Driver matching logic & ETA
+* [x] Ratings system for drivers & stores
 * [ ] Notifications (SMS, push)
 
 ---
@@ -162,6 +162,8 @@ Exposes this as a REST API to the main backend.
 
  Optional: Integrate with Google Maps Directions API for accuracy.
 
+* [x] Basic Python optimizer microservice
+
 
 
 ### 📦 Phase 5: Deployment & CI/CD
@@ -175,7 +177,7 @@ Exposes this as a REST API to the main backend.
 
 ### 🧪 Phase 6: Testing & QA
 
-* [ ] Unit & integration tests
+* [x] Unit & integration tests
 * [ ] End-to-end testing with Cypress
 * [ ] Beta testing with real users
 * [ ] Feedback collection & fixes

@@ -62,6 +62,13 @@ export default function CustomerFeed() {
         onChange={(e) => setFilter(e.target.value)}
       />
 
+      <button
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+        onClick={() => router.push('/Frontend/Customer/NearbyStores')}
+      >
+        Find Stores Near Me
+      </button>
+
       <StoreList
         stores={filtered}
         onSelect={(id) => router.push(`/Frontend/Customer/StoreDetail/${id}`)}

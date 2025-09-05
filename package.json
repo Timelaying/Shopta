@@ -9,6 +9,7 @@
     "start": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json tsx shopping-taxi-app/src/app/backend/server_apis_db/server.ts"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.7",
     "axios": "^1.6.7",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",

@@ -13,6 +13,15 @@ export const getAllStores = async (): Promise<Store[]> => {
   return rows;
 };
 
+export const searchStores = async (term: string): Promise<Store[]> => {
+  const like = `%${term}%`;
+  const { rows } = await pool.query(
+    'SELECT * FROM stores WHERE name ILIKE $1 OR address ILIKE $1 ORDER BY name',
+    [like]
+  );
+  return rows;
+};
+
 export const getStoreById = async (id: number): Promise<Store | null> => {
   const { rows } = await pool.query('SELECT * FROM stores WHERE id = $1', [id]);
   return rows[0] || null;

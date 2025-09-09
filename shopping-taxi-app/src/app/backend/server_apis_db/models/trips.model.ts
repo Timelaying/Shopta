@@ -40,6 +40,17 @@ export const markStopVisited = async (stopId: number): Promise<TripStop> => {
   return result.rows[0];
 };
 
+export const getNextUnvisitedStop = async (
+  tripId: number,
+  sequence: number
+): Promise<TripStop | null> => {
+  const result = await pool.query(
+    'SELECT * FROM trip_stops WHERE trip_id = $1 AND sequence > $2 AND visited = FALSE ORDER BY sequence LIMIT 1',
+    [tripId, sequence]
+  );
+  return result.rows[0] || null;
+};
+
 export const getTripsByUser = async (userId: number): Promise<Trip[]> => {
   const result = await pool.query('SELECT * FROM trips WHERE user_id = $1', [userId]);
   return result.rows;

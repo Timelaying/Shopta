@@ -36,7 +36,10 @@ export const getAllStores = async (
 
 export const listStores: RequestHandler = async (req, res, next) => {
   try {
-    const stores = await StoreModel.getAllStores();
+    const { q } = req.query;
+    const stores = typeof q === 'string' && q.length > 0
+      ? await StoreModel.searchStores(q)
+      : await StoreModel.getAllStores();
     res.json({ stores }); return;
   } catch (err) { next(err); return; }
 };

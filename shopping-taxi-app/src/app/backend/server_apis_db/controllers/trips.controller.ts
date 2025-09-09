@@ -29,6 +29,9 @@ export const createTrip = async (
     if (!['small','standard','large'].includes(vehicleSize)) {
       res.status(400).json({ error: 'Invalid vehicle size' }); return;
     }
+    if (!Array.isArray(stops) || stops.length === 0 || stops.length > 10) {
+      res.status(400).json({ error: 'Stops must be 1-10' }); return;
+    }
     const trip = await TripModel.createTrip(userId, vehicleSize);
     await TripModel.addTripStops(trip.id, stops);
     const driver = await matchDriverToTrip(trip.id);
@@ -63,11 +66,12 @@ export const completeStop = async (
   try {
     const stopId = parseInt(req.params.stopId, 10);
     const stop = await TripModel.markStopVisited(stopId);
+    const nextStop = await TripModel.getNextUnvisitedStop(stop.trip_id, stop.sequence);
     const userId = req.user?.id;
     if (userId) {
       await sendNotification(userId, `Stop ${stopId} completed`);
     }
-    res.json({ stop }); return;
+    res.json({ stop, nextStop }); return;
   } catch (err) { next(err); return; }
 };
 

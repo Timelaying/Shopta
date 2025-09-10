@@ -9,6 +9,7 @@ export default function TripPlanner() {
   const [step, setStep] = useState<Step>(Step.Select);
   const [stops, setStops] = useState<{id:string,description:string,location:{lat:number,lng:number}}[]>([]);
   const [vehicleSize, setVehicleSize] = useState<'small'|'standard'|'large'>('standard');
+  const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const router = useRouter();
 
   type Place = {
@@ -33,9 +34,15 @@ export default function TripPlanner() {
       typeof (place as Place).location.lng === 'number'
     ) {
       const stop = place as Place;
-      if (stops.find(s => s.id === stop.id) || stops.length >= 10) return;
+      const maxStops = vehicleSize === 'small' ? 5 : vehicleSize === 'large' ? 15 : 10;
+      if (stops.find(s => s.id === stop.id) || stops.length >= maxStops) return;
       setStops([...stops, stop]);
     }
+  };
+
+  const removeStop = (index: number) => {
+    if (index < currentStopIndex) return;
+    setStops(stops.filter((_, i) => i !== index));
   };
 
   const submit = async () => {
@@ -53,7 +60,18 @@ export default function TripPlanner() {
         <>
           <h2>Select Stops</h2>
           <PlacesAutocomplete onSelect={addStop} />
-          <ul>{stops.map((s,i)=><li key={s.id}>{i+1}. {s.description}</li>)}</ul>
+          <ul>
+            {stops.map((s,i)=>
+              <li key={s.id}>
+                {i+1}. {s.description}
+                <button
+                  className="ml-2"
+                  onClick={()=>removeStop(i)}
+                  disabled={i < currentStopIndex}
+                >Remove</button>
+              </li>
+            )}
+          </ul>
           <label htmlFor="vehicle-size-select">Vehicle Size:</label>
           <select
             id="vehicle-size-select"
@@ -72,6 +90,10 @@ export default function TripPlanner() {
           <h2>Review</h2>
           <p>Vehicle: {vehicleSize}</p>
           <ol>{stops.map(s=><li key={s.id}>{s.description}</li>)}</ol>
+          <button
+            onClick={()=>setCurrentStopIndex(i=>Math.min(i+1, stops.length))}
+            disabled={currentStopIndex>=stops.length}
+          >Next Stop</button>
           <button onClick={()=>setStep(Step.Confirm)}>Confirm</button>
         </>
       )}

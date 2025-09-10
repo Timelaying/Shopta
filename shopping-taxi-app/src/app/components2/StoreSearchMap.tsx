@@ -1,6 +1,7 @@
 'use client';
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 import { useCallback, useState } from 'react';
+import apiClient from '@/app/services/apiClient';
 
 const containerStyle = { width: '100%', height: '400px' };
 const libraries: ('places')[] = ['places'];
@@ -51,6 +52,14 @@ export default function StoreSearchMap() {
                 name: r.name || 'Store',
               }));
             setMarkers(newMarkers);
+            newMarkers.forEach(m => {
+              apiClient.post('/stores', {
+                name: m.name,
+                address: m.name,
+                latitude: m.position.lat,
+                longitude: m.position.lng
+              }).catch(() => {});
+            });
           }
         );
       });

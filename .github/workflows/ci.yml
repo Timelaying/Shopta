@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run Node tests
+        run: npm test
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r route_optimizer_service/requirements.txt
+          pip install pytest
+
+      - name: Run Python tests
+        run: pytest route_optimizer_service/tests
+
+      - name: Build frontend Docker image
+        run: docker build -f Dockerfile.frontend -t shopta-frontend .
+
+      - name: Build backend Docker image
+        run: docker build -f Dockerfile.backend -t shopta-backend .

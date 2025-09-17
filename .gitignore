@@ -2,3 +2,7 @@ node_modules/
 .DS_Store
 __pycache__/
 *.pyc
+trip-analytics-service/target/
+trip-analytics-service/.mvn/
+trip-analytics-service/mvnw
+trip-analytics-service/mvnw.cmd

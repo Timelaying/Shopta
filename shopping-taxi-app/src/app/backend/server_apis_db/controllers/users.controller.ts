@@ -14,7 +14,17 @@ export const createUser = async (
 
   try {
     const user = await UserModel.createUser(username, email, password);
-    res.status(201).json(user);
+    res.status(201).json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      referral: {
+        code: user.referral_code,
+        points: user.referral_points,
+        referredBy: user.referred_by,
+      },
+    });
   } catch (err) {
     next(err);
   }

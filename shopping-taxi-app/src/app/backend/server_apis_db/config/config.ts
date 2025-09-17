@@ -63,6 +63,8 @@ interface AppConfig {
   db: DBConfig;
   baseUrl: string;
   frontendUrl: string;
+  pythonOptimizerUrl: string;
+  analyticsServiceUrl: string;
 }
 
 const config: AppConfig = {
@@ -76,6 +78,10 @@ const config: AppConfig = {
   },
   baseUrl: process.env.BASE_URL ?? "http://localhost:5000",
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
+  pythonOptimizerUrl:
+    process.env.PYTHON_OPTIMIZER_URL ?? "http://localhost:8000",
+  analyticsServiceUrl:
+    process.env.ANALYTICS_SERVICE_URL ?? "http://localhost:8085",
 };
 
 export default config;

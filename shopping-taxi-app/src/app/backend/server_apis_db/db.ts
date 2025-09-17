@@ -34,7 +34,16 @@ export const initializeDatabase = async (): Promise<void> => {
     // In case users table existed before, add role column if missing
     await client.query(`
       ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer';
+      ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer',
+      ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE,
+      ADD COLUMN IF NOT EXISTS referred_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      ADD COLUMN IF NOT EXISTS referral_points INTEGER NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      UPDATE users
+      SET referral_code = CONCAT('REF', LPAD(id::text, 6, '0'))
+      WHERE referral_code IS NULL;
     `);
 
     // Refresh tokens
@@ -102,6 +111,32 @@ export const initializeDatabase = async (): Promise<void> => {
         store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
         visited BOOLEAN DEFAULT FALSE,
         sequence INTEGER NOT NULL
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS promotions (
+        id SERIAL PRIMARY KEY,
+        store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+        title VARCHAR(150) NOT NULL,
+        description TEXT,
+        discount_percentage DECIMAL(5,2) NOT NULL DEFAULT 0,
+        start_date TIMESTAMP NOT NULL,
+        end_date TIMESTAMP NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS referrals (
+        id SERIAL PRIMARY KEY,
+        referrer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        referee_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        referral_code VARCHAR(20) NOT NULL,
+        reward_points INTEGER NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'completed',
+        created_at TIMESTAMP DEFAULT NOW()
       );
     `);
 

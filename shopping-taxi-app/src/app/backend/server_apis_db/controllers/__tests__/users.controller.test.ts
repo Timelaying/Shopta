@@ -18,6 +18,19 @@ const createMockRes = () => {
   return res;
 };
 
+const createMockClient = (user: any) => ({
+  query: mock.fn(async (text: string) => {
+    if (text.includes('SELECT id FROM users WHERE referral_code')) {
+      return { rows: [] };
+    }
+    if (text.startsWith('INSERT INTO users')) {
+      return { rows: [user] };
+    }
+    return { rows: [] };
+  }),
+  release: mock.fn(),
+});
+
 test('createUser responds with 400 if fields missing', async () => {
   const req: any = { body: { email: 'a@b.com', password: 'pw' } };
   const res = createMockRes();
@@ -29,11 +42,30 @@ test('createUser stores user and returns 201', async () => {
   mock.restoreAll();
   const req: any = { body: { username: 'bob', email: 'b@e.com', password: 'pw' } };
   const res = createMockRes();
-  const user = { id: 1, username: 'bob', email: 'b@e.com', role: 'customer' };
-  mock.method(pool, 'query', async () => ({ rows: [user] }));
+  const user = {
+    id: 1,
+    username: 'bob',
+    email: 'b@e.com',
+    role: 'customer',
+    referral_code: 'ABC123',
+    referral_points: 10,
+    referred_by: null,
+  };
+  const client = createMockClient(user);
+  mock.method(pool, 'connect', async () => client);
   await createUser(req, res, () => {});
   assert.strictEqual(res.status.mock.calls[0].arguments[0], 201);
-  assert.deepStrictEqual(res.json.mock.calls[0].arguments[0], user);
+  assert.deepStrictEqual(res.json.mock.calls[0].arguments[0], {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    referral: {
+      code: user.referral_code,
+      points: user.referral_points,
+      referredBy: user.referred_by,
+    },
+  });
 });
 
 test('getUser responds with 404 if user not found', async () => {

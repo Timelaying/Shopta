@@ -186,10 +186,10 @@ Exposes this as a REST API to the main backend.
 
 ## 🧠 Optional Enhancements
 
-* AI suggestion for best shopping route (use Python)
-* Java microservice for trip analytics
-* Referral system
-* Store promotions and deals API
+* [x] AI suggestion for best shopping route (use Python)
+* [x] Java microservice for trip analytics
+* [x] Referral system
+* [x] Store promotions and deals API
 
 ---
 

@@ -21,14 +21,28 @@ const COOKIE_OPTS = {
 
 // — REGISTER —
 export const register: RequestHandler = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, referralCode } = req.body;
   if (!username || !email || !password) {
     res.status(400).json({ error: 'Missing fields' });
     return;
   }
   try {
-    const user = await UserModel.createUser(username, email, password);
-    res.status(201).json({ message: 'Registration successful', user });
+    const user = await UserModel.createUser(username, email, password, 'customer', referralCode);
+    res.status(201).json({
+      message: 'Registration successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        referral: {
+          code: user.referral_code,
+          points: user.referral_points,
+          referredBy: user.referred_by,
+          applied: Boolean(referralCode && user.referred_by),
+        },
+      },
+    });
     return;
   } catch (err: unknown) {
     next(err);

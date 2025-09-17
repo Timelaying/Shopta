@@ -17,6 +17,10 @@ import storeItemRoutes from './routes/storeItems.routes';
 import tripRoutes from './routes/trips.routes';
 import tripItemRoutes from './routes/tripItems.routes';
 import ratingRoutes from './routes/ratings.routes';
+import referralRoutes from './routes/referrals.routes';
+import promotionsRoutes from './routes/promotions.routes';
+import routeOptimizationRoutes from './routes/routeOptimization.routes';
+import analyticsRoutes from './routes/analytics.routes';
 
 // If using Socket.IO types, ensure you have installed @types/socket.io
 // npm install socket.io @types/socket.io
@@ -63,6 +67,10 @@ app.use('/api/store-items', storeItemRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/trip-items', tripItemRoutes);
 app.use('/api/ratings', ratingRoutes);
+app.use('/api/referrals', referralRoutes);
+app.use('/api/promotions', promotionsRoutes);
+app.use('/api/route-optimization', routeOptimizationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Error handlers
 app.use(notFound);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isTokenExpired } from '@/app/utils/jwt';
+import { isTokenExpired } from '../utils/jwt';
 import { getAccessToken, setAccessToken } from './tokenService';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';

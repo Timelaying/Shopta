@@ -1,25 +1,22 @@
 'use client';
 import { useState } from 'react';
-import apiClient from '@/app/services/apiClient';
 import { useRouter } from 'next/navigation';
-import { PlacesAutocomplete } from '@/app/components2/PlacesAutocomplete';
+import { PlacesAutocomplete } from '../../../components2/PlacesAutocomplete';
+import { Place, Stop, persistPlaceAsStore, submitTrip } from './tripPlannerUtils';
 
 enum Step { Select=0, Review=1, Confirm=2 }
+
 export default function TripPlanner() {
   const [step, setStep] = useState<Step>(Step.Select);
-  const [stops, setStops] = useState<{id:string,description:string,location:{lat:number,lng:number}}[]>([]);
+  const [stops, setStops] = useState<Stop[]>([]);
   const [vehicleSize, setVehicleSize] = useState<'small'|'standard'|'large'>('standard');
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  type Place = {
-    id: string;
-    description: string;
-    location: { lat: number; lng: number };
-  };
-
-  const addStop = (place: unknown) => {
-    // Type guard to ensure 'place' matches the expected shape
+  const addStop = async (place: unknown) => {
+    setError(null);
     if (
       typeof place === 'object' &&
       place !== null &&
@@ -35,23 +32,42 @@ export default function TripPlanner() {
     ) {
       const stop = place as Place;
       const maxStops = vehicleSize === 'small' ? 5 : vehicleSize === 'large' ? 15 : 10;
-      if (stops.find(s => s.id === stop.id) || stops.length >= maxStops) return;
-      setStops([...stops, stop]);
+      if (stops.find((s) => s.id === stop.id) || stops.length >= maxStops) return;
+      try {
+        const persisted = await persistPlaceAsStore(stop);
+        setStops((prev) => {
+          if (prev.find((existing) => existing.id === persisted.id) || prev.length >= maxStops) {
+            return prev;
+          }
+          return [...prev, persisted];
+        });
+      } catch (err) {
+        console.error('Failed to persist stop', err);
+        setError('Unable to save this stop. Please try again.');
+      }
     }
   };
 
   const removeStop = (index: number) => {
     if (index < currentStopIndex) return;
-    setStops(stops.filter((_, i) => i !== index));
+    setStops((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      setCurrentStopIndex((current) => Math.min(current, updated.length));
+      return updated;
+    });
   };
 
   const submit = async () => {
-    const payload = {
-      stops: stops.map((s,i)=>({ store_id: 0 /* ignore id mapping for now */, sequence: i+1 })),
-      vehicleSize
-    };
-    const res = await apiClient.post('/trips', payload, { withCredentials: true });
-    router.push(`/Frontend/Customer/StoreDetail/${res.data.tripId}`);
+    setError(null);
+    try {
+      setIsSubmitting(true);
+      await submitTrip(stops, vehicleSize, router);
+    } catch (err) {
+      console.error('Trip submission failed', err);
+      setError(err instanceof Error ? err.message : 'Failed to start trip. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -63,7 +79,7 @@ export default function TripPlanner() {
           <ul>
             {stops.map((s,i)=>
               <li key={s.id}>
-                {i+1}. {s.description}
+                {i+1}. {s.storeName}
                 <button
                   className="ml-2"
                   onClick={()=>removeStop(i)}
@@ -89,7 +105,7 @@ export default function TripPlanner() {
         <>
           <h2>Review</h2>
           <p>Vehicle: {vehicleSize}</p>
-          <ol>{stops.map(s=><li key={s.id}>{s.description}</li>)}</ol>
+          <ol>{stops.map(s=><li key={s.id}>{s.storeName}<div className="text-sm text-gray-600">{s.storeAddress}</div></li>)}</ol>
           <button
             onClick={()=>setCurrentStopIndex(i=>Math.min(i+1, stops.length))}
             disabled={currentStopIndex>=stops.length}
@@ -100,9 +116,12 @@ export default function TripPlanner() {
       {step===Step.Confirm && (
         <>
           <h2>Start Trip</h2>
-          <button onClick={submit}>Start</button>
+          <button onClick={submit} disabled={isSubmitting || !stops.length}>
+            {isSubmitting ? 'Starting…' : 'Start'}
+          </button>
         </>
       )}
+      {error && <p className="text-red-600" role="alert">{error}</p>}
     </main>
   );
 }

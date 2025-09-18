@@ -4,7 +4,9 @@ import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocom
 import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from '@reach/combobox';
 import '@reach/combobox/styles.css';
 
-interface Props { onSelect: (place: { id: string; description: string; location: { lat: number; lng: number } }) => void; }
+interface Props {
+  onSelect: (place: { id: string; description: string; location: { lat: number; lng: number } }) => void | Promise<void>;
+}
 export const PlacesAutocomplete: FC<Props> = ({ onSelect }) => {
   const { ready, value, suggestions, setValue, clearSuggestions } = usePlacesAutocomplete({ requestOptions: { /* bounds, etc */ } });
   const handleSelect = async (address: string) => {
@@ -12,7 +14,7 @@ export const PlacesAutocomplete: FC<Props> = ({ onSelect }) => {
     clearSuggestions();
     const results = await getGeocode({ address });
     const { lat, lng } = await getLatLng(results[0]);
-    onSelect({ id: results[0].place_id, description: address, location: { lat, lng } });
+    await onSelect({ id: results[0].place_id, description: address, location: { lat, lng } });
   };
   return (
     <Combobox onSelect={handleSelect} aria-label="Store location">

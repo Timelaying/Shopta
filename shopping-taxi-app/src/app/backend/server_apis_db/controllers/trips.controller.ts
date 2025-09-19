@@ -57,6 +57,33 @@ export const getDriverTrips: RequestHandler = async (req, res, next) => {
   } catch (err) { next(err); return; }
 };
 
+export const getTripById: RequestHandler = async (req, res, next) => {
+  try {
+    const tripId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(tripId)) { res.status(400).json({ error: 'Invalid trip id' }); return; }
+    const trip = await TripModel.getTripById(tripId);
+    if (!trip) { res.status(404).json({ error: 'Trip not found' }); return; }
+    const stops = (trip.stops ?? []).map(stop => ({
+      id: stop.id,
+      trip_id: stop.trip_id,
+      store_id: stop.store_id,
+      visited: stop.visited,
+      sequence: stop.sequence,
+      name: stop.store_name ?? undefined,
+      address: stop.store_address ?? undefined,
+      latitude: stop.latitude ?? null,
+      longitude: stop.longitude ?? null,
+    }));
+    res.json({
+      id: trip.id,
+      user_id: trip.user_id,
+      vehicle_size: trip.vehicle_size,
+      created_at: trip.created_at,
+      stops,
+    }); return;
+  } catch (err) { next(err); return; }
+};
+
 // Driver: mark current stop done
 export const completeStop = async (
   req: Request & { user?: { id: number } },
@@ -72,6 +99,29 @@ export const completeStop = async (
       await sendNotification(userId, `Stop ${stopId} completed`);
     }
     res.json({ stop, nextStop }); return;
+  } catch (err) { next(err); return; }
+};
+
+export const getTripStop: RequestHandler = async (req, res, next) => {
+  try {
+    const stopId = Number.parseInt(req.params.stopId, 10);
+    if (Number.isNaN(stopId)) { res.status(400).json({ error: 'Invalid stop id' }); return; }
+    const stop = await TripModel.getTripStopById(stopId);
+    if (!stop) { res.status(404).json({ error: 'Trip stop not found' }); return; }
+    const latitude = stop.latitude ?? null;
+    const longitude = stop.longitude ?? null;
+    res.json({
+      id: stop.id,
+      trip_id: stop.trip_id,
+      store_id: stop.store_id,
+      visited: stop.visited,
+      sequence: stop.sequence,
+      name: stop.store_name ?? undefined,
+      address: stop.store_address ?? undefined,
+      coords: [latitude, longitude] as [number | null, number | null],
+      latitude,
+      longitude,
+    }); return;
   } catch (err) { next(err); return; }
 };
 

@@ -1,7 +1,16 @@
 import pool from '../db';
 
-export interface Trip { id: number; user_id: number; created_at: string; }
+export interface Trip { id: number; user_id: number; created_at: string; vehicle_size: string; }
 export interface TripStop { id: number; trip_id: number; store_id: number; visited: boolean; sequence: number; }
+
+export interface TripStopWithStore extends TripStop {
+  store_name?: string | null;
+  store_address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export type TripWithStops = Trip & { stops: TripStopWithStore[] };
 
 export const createTrip = async (userId: number, vehicleSize: string): Promise<Trip> => {
   const { rows } = await pool.query(
@@ -30,6 +39,36 @@ export const getTripStops = async (tripId: number): Promise<TripStop[]> => {
     [tripId]
   );
   return result.rows;
+};
+
+export const getTripById = async (tripId: number): Promise<TripWithStops | null> => {
+  const tripResult = await pool.query('SELECT * FROM trips WHERE id = $1', [tripId]);
+  const trip = tripResult.rows[0] as Trip | undefined;
+  if (!trip) {
+    return null;
+  }
+  const stopResult = await pool.query(
+    `SELECT ts.*, s.name AS store_name, s.address AS store_address, s.latitude, s.longitude
+     FROM trip_stops ts
+     LEFT JOIN stores s ON ts.store_id = s.id
+     WHERE ts.trip_id = $1
+     ORDER BY ts.sequence`,
+    [tripId]
+  );
+  const stops = stopResult.rows as TripStopWithStore[];
+  return { ...trip, stops };
+};
+
+export const getTripStopById = async (stopId: number): Promise<TripStopWithStore | null> => {
+  const result = await pool.query(
+    `SELECT ts.*, s.name AS store_name, s.address AS store_address, s.latitude, s.longitude
+     FROM trip_stops ts
+     LEFT JOIN stores s ON ts.store_id = s.id
+     WHERE ts.id = $1`,
+    [stopId]
+  );
+  const stop = result.rows[0] as TripStopWithStore | undefined;
+  return stop ?? null;
 };
 
 export const markStopVisited = async (stopId: number): Promise<TripStop> => {

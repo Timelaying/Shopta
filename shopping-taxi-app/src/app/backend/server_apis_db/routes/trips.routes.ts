@@ -23,17 +23,26 @@ router.get(
     jwtMiddleware,
     TripCtrl.getDriverTrips as RequestHandler
 );
-router.patch(
-    '/stops/:stopId/done',
-    jwtMiddleware,
-    TripCtrl.completeStop as RequestHandler
-);
-
 // Admin routes
 router.get(
     '/admin',
     jwtMiddleware,
     TripCtrl.adminGetTrips as RequestHandler
+);
+router.patch(
+    '/stops/:stopId/done',
+    jwtMiddleware,
+    TripCtrl.completeStop as RequestHandler
+);
+router.get(
+    '/stops/:stopId',
+    jwtMiddleware,
+    TripCtrl.getTripStop as RequestHandler
+);
+router.get(
+    '/:id',
+    jwtMiddleware,
+    TripCtrl.getTripById as RequestHandler
 );
 
 export default router;

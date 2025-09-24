@@ -1,4 +1,9 @@
 import apiClient from '../../../services/apiClient';
+import {
+  MIN_STOPS_PER_TRIP,
+  getMaxStopsForVehicle,
+  type VehicleSize,
+} from '../../../shared/tripLimits';
 
 export type Place = {
   id: string;
@@ -38,7 +43,7 @@ export const persistPlaceAsStore = async (place: Place): Promise<Stop> => {
 
 export const buildTripPayload = (
   stops: Stop[],
-  vehicleSize: 'small' | 'standard' | 'large'
+  vehicleSize: VehicleSize
 ) => ({
   stops: stops.map((stop, index) => ({ store_id: stop.storeId, sequence: index + 1 })),
   vehicleSize,
@@ -46,11 +51,17 @@ export const buildTripPayload = (
 
 export const submitTrip = async (
   stops: Stop[],
-  vehicleSize: 'small' | 'standard' | 'large',
+  vehicleSize: VehicleSize,
   router: { push: (url: string) => void }
 ) => {
-  if (!stops.length) {
+  if (stops.length < MIN_STOPS_PER_TRIP) {
     throw new Error('Add at least one stop before starting a trip.');
+  }
+  const maxStops = getMaxStopsForVehicle(vehicleSize);
+  if (stops.length > maxStops) {
+    throw new Error(
+      `Trips with a ${vehicleSize} vehicle can include at most ${maxStops} stops.`
+    );
   }
   const invalidStop = stops.find((stop) => typeof stop.storeId !== 'number' || !Number.isFinite(stop.storeId));
   if (invalidStop) {

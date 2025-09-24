@@ -2,6 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import * as TripModel from '../models/trips.model';
 import { matchDriverToTrip, estimateArrival } from '../services/driver.service';
 import { sendNotification } from '../services/notification.service';
+import {
+  MIN_STOPS_PER_TRIP,
+  getMaxStopsForVehicle,
+  isVehicleSize,
+} from '../../../shared/tripLimits';
 
 
 // Extend Express Request interface to include 'user'
@@ -26,11 +31,15 @@ export const createTrip = async (
   try {
     const userId = req.user.id;
     const { stops, vehicleSize } = req.body; // vehicleSize from frontend
-    if (!['small','standard','large'].includes(vehicleSize)) {
+    if (!Array.isArray(stops)) {
+      res.status(400).json({ error: 'Stops must be provided as an array' }); return;
+    }
+    if (!isVehicleSize(vehicleSize)) {
       res.status(400).json({ error: 'Invalid vehicle size' }); return;
     }
-    if (!Array.isArray(stops) || stops.length === 0 || stops.length > 10) {
-      res.status(400).json({ error: 'Stops must be 1-10' }); return;
+    const maxStops = getMaxStopsForVehicle(vehicleSize);
+    if (stops.length < MIN_STOPS_PER_TRIP || stops.length > maxStops) {
+      res.status(400).json({ error: `Stops must be between ${MIN_STOPS_PER_TRIP} and ${maxStops}` }); return;
     }
     const trip = await TripModel.createTrip(userId, vehicleSize);
     await TripModel.addTripStops(trip.id, stops);

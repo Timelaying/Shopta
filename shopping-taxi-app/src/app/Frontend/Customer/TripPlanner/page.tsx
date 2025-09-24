@@ -3,13 +3,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlacesAutocomplete } from '../../../components2/PlacesAutocomplete';
 import { Place, Stop, persistPlaceAsStore, submitTrip } from './tripPlannerUtils';
+import {
+  VEHICLE_STOP_LIMITS,
+  type VehicleSize,
+} from '../../../shared/tripLimits';
 
 enum Step { Select=0, Review=1, Confirm=2 }
 
 export default function TripPlanner() {
   const [step, setStep] = useState<Step>(Step.Select);
   const [stops, setStops] = useState<Stop[]>([]);
-  const [vehicleSize, setVehicleSize] = useState<'small'|'standard'|'large'>('standard');
+  const [vehicleSize, setVehicleSize] = useState<VehicleSize>('standard');
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,7 +35,7 @@ export default function TripPlanner() {
       typeof (place as Place).location.lng === 'number'
     ) {
       const stop = place as Place;
-      const maxStops = vehicleSize === 'small' ? 5 : vehicleSize === 'large' ? 15 : 10;
+      const maxStops = VEHICLE_STOP_LIMITS[vehicleSize];
       if (stops.find((s) => s.id === stop.id) || stops.length >= maxStops) return;
       try {
         const persisted = await persistPlaceAsStore(stop);
@@ -92,7 +96,7 @@ export default function TripPlanner() {
           <select
             id="vehicle-size-select"
             value={vehicleSize}
-            onChange={e => setVehicleSize(e.target.value as 'small' | 'standard' | 'large')}
+            onChange={e => setVehicleSize(e.target.value as VehicleSize)}
           >
             <option value="small">Small</option>
             <option value="standard">Standard</option>

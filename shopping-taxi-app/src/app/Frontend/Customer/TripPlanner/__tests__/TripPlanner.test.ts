@@ -46,3 +46,38 @@ test('submitTrip posts stops with real store ids', async () => {
   assert.strictEqual(postMock.mock.calls.length, 1);
   postMock.mock.restore();
 });
+
+test('submitTrip rejects when stops exceed the vehicle limit', async () => {
+  const TripPlannerModule = await import('../tripPlannerUtils.ts');
+  const { VEHICLE_STOP_LIMITS } = await import('../../../../shared/tripLimits.ts');
+  const apiClient = (await import('../../../../services/apiClient.ts')).default;
+  const postMock = mock.method(apiClient, 'post', async () => {
+    throw new Error('API should not be called when stop limit is exceeded');
+  });
+
+  const vehicleSize = 'standard';
+  const maxStops = VEHICLE_STOP_LIMITS[vehicleSize];
+  const stops: TripPlannerModule.Stop[] = Array.from({ length: maxStops + 1 }, (_, index) => ({
+    id: `place-${index}`,
+    description: `Store ${index}`,
+    location: { lat: 1, lng: 2 },
+    storeId: index + 1,
+    storeName: `Store ${index}`,
+    storeAddress: `${index} Main St`,
+  }));
+
+  await assert.rejects(
+    () =>
+      TripPlannerModule.submitTrip(stops, vehicleSize, {
+        push: () => {
+          throw new Error('Navigation should not occur when stop limit is exceeded');
+        },
+      }),
+    {
+      message: `Trips with a ${vehicleSize} vehicle can include at most ${maxStops} stops.`,
+    }
+  );
+
+  assert.strictEqual(postMock.mock.calls.length, 0);
+  postMock.mock.restore();
+});

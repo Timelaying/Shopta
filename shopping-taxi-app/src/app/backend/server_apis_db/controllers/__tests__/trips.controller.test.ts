@@ -9,7 +9,8 @@ process.env.ACCESS_TOKEN_SECRET = 'access';
 process.env.REFRESH_TOKEN_SECRET = 'refresh';
 
 const pool = (await import('../../db.ts')).default;
-const { getTripById, getTripStop } = await import('../trips.controller.ts');
+const { createTrip, getTripById, getTripStop } = await import('../trips.controller.ts');
+const { VEHICLE_STOP_LIMITS, MIN_STOPS_PER_TRIP } = await import('../../../../shared/tripLimits.ts');
 
 const createMockRes = () => {
   const res: any = {};
@@ -17,6 +18,90 @@ const createMockRes = () => {
   res.json = mock.fn((body: unknown) => { res.body = body; });
   return res;
 };
+
+test('createTrip rejects requests exceeding the per-vehicle stop limit', async () => {
+  mock.restoreAll();
+  const poolQueryMock = mock.method(pool, 'query', async () => {
+    throw new Error('pool.query should not be called when validation fails');
+  });
+  const req: any = {
+    user: { id: 1 },
+    body: {
+      vehicleSize: 'small',
+      stops: Array.from({ length: VEHICLE_STOP_LIMITS.small + 1 }, (_, index) => ({
+        store_id: index + 1,
+        sequence: index + 1,
+      })),
+    },
+  };
+  const res = createMockRes();
+
+  await createTrip(req, res, () => {});
+
+  assert.strictEqual(res.status.mock.calls[0].arguments[0], 400);
+  assert.deepStrictEqual(res.json.mock.calls[0].arguments[0], {
+    error: `Stops must be between ${MIN_STOPS_PER_TRIP} and ${VEHICLE_STOP_LIMITS.small}`,
+  });
+  assert.strictEqual(poolQueryMock.mock.calls.length, 0);
+  mock.restoreAll();
+});
+
+test('createTrip allows stop counts at the vehicle limit', async () => {
+  mock.restoreAll();
+  const limit = VEHICLE_STOP_LIMITS.large;
+  const req: any = {
+    user: { id: 9 },
+    body: {
+      vehicleSize: 'large',
+      stops: Array.from({ length: limit }, (_, index) => ({
+        store_id: index + 100,
+        sequence: index + 1,
+      })),
+    },
+  };
+  const res = createMockRes();
+
+  const stopInserts: Array<[number, number, number]> = [];
+  const poolQueryMock = mock.method(pool, 'query', async (text: string, params?: any[]) => {
+    if (text.startsWith('INSERT INTO trips')) {
+      return {
+        rows: [
+          {
+            id: 77,
+            user_id: req.user.id,
+            vehicle_size: req.body.vehicleSize,
+            created_at: '2024-06-01T00:00:00.000Z',
+          },
+        ],
+      };
+    }
+    if (text.startsWith('INSERT INTO trip_stops')) {
+      stopInserts.push(params as [number, number, number]);
+      return { rows: [] };
+    }
+    if (text.includes("FROM users") && text.includes("role = 'driver'")) {
+      return { rows: [{ id: 42, username: 'Driver Dan' }] };
+    }
+    throw new Error(`Unexpected query: ${text}`);
+  });
+
+  await createTrip(req, res, () => {});
+
+  assert.strictEqual(res.status.mock.calls[0].arguments[0], 201);
+  assert.deepStrictEqual(res.json.mock.calls[0].arguments[0], {
+    tripId: 77,
+    driver: { id: 42, username: 'Driver Dan' },
+    eta: 5,
+  });
+  assert.strictEqual(stopInserts.length, limit);
+  stopInserts.forEach(([tripId, storeId, sequence], index) => {
+    assert.strictEqual(tripId, 77);
+    assert.strictEqual(storeId, req.body.stops[index].store_id);
+    assert.strictEqual(sequence, req.body.stops[index].sequence);
+  });
+  assert.ok(poolQueryMock.mock.calls.length >= limit + 2);
+  mock.restoreAll();
+});
 
 test('getTripById returns trip with formatted stops', async () => {
   mock.restoreAll();

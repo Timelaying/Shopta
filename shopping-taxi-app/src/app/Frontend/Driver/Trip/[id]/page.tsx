@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import { useParams } from 'next/navigation';
 import apiClient from '@/app/services/apiClient';
 import GoogleMap from '@/app/components2/GoogleMap';
+import { SOCKET_URL } from '@/app/services/socketConfig';
 
 export default function DriverTrip() {
   const { id } = useParams();
@@ -18,7 +19,7 @@ export default function DriverTrip() {
 
     // Setup socket
     // Setup socket
-    const s = io(process.env.NEXT_PUBLIC_API_URL!);
+    const s = io(SOCKET_URL, { path: '/socket.io' });
     s.emit('joinTrip', id);
     // Watch geolocation
     const watcher = navigator.geolocation.watchPosition(pos => {

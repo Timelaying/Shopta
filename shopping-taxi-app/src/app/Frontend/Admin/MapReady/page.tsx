@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import GoogleMap from '@/app/components2/GoogleMap';
+import { SOCKET_URL } from '@/app/services/socketConfig';
 
 export default function AdminMapLive() {
   const params = useSearchParams();
@@ -11,7 +12,7 @@ export default function AdminMapLive() {
   const [coords, setCoords] = useState<[number,number][]>([]);
 
   useEffect(() => {
-    const s = io(process.env.NEXT_PUBLIC_API_URL!);
+    const s = io(SOCKET_URL, { path: '/socket.io' });
     s.emit('joinTrip', tripId);
     s.on('locationUpdate', ({ lat, lng }: { lat: number; lng: number }) => {
       setCoords(prev => [...prev, [lat, lng]]);

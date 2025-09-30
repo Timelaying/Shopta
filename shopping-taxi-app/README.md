@@ -84,6 +84,14 @@ Configuration & Utilities
 
 Environment variables are loaded via dotenv (config.ts, jwtConfig.ts).
 
+### Socket configuration
+
+- `NEXT_PUBLIC_API_URL` (e.g., `http://localhost:5001/api`) continues to point to the REST API base path.
+- `NEXT_PUBLIC_SOCKET_URL` is optional. When set, the frontend Socket.IO clients connect to this origin (e.g., `http://localhost:5001`).
+- If `NEXT_PUBLIC_SOCKET_URL` is not provided, the clients derive the socket origin from `NEXT_PUBLIC_API_URL` by stripping any trailing `/api` segment.
+
+Both the driver trip tracker and the admin live map now share this configuration helper to ensure they reach the Socket.IO server at `/socket.io` while leaving REST calls on the existing Axios client.
+
 parseJwt and isTokenExpired utilities handle token parsing and expiry checks.
 
 Pointers for Learning Next

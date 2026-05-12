@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY route_optimizer_service/requirements.txt ./route_optimizer_service/requirements.txt
+RUN pip install --no-cache-dir -r route_optimizer_service/requirements.txt
+
+COPY route_optimizer_service ./route_optimizer_service
+
+EXPOSE 8000
+CMD ["uvicorn", "route_optimizer_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

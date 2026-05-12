@@ -1,0 +1,105 @@
+-- Shopta baseline schema for local development and Docker Compose.
+-- Keep this idempotent so it can also be applied manually during setup.
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(20) NOT NULL DEFAULT 'customer',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer',
+  ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE,
+  ADD COLUMN IF NOT EXISTS referred_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS referral_points INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, token)
+);
+
+CREATE TABLE IF NOT EXISTS stores (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  address TEXT NOT NULL,
+  latitude DECIMAL(9,6) NOT NULL DEFAULT 0,
+  longitude DECIMAL(9,6) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS items (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  category VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS store_items (
+  id SERIAL PRIMARY KEY,
+  store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+  item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+  price DECIMAL(10, 2) NOT NULL,
+  UNIQUE(store_id, item_id)
+);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  vehicle_size VARCHAR(20) DEFAULT 'standard'
+);
+
+CREATE TABLE IF NOT EXISTS trip_items (
+  id SERIAL PRIMARY KEY,
+  trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
+  item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  UNIQUE(trip_id, item_id)
+);
+
+CREATE TABLE IF NOT EXISTS trip_stops (
+  id SERIAL PRIMARY KEY,
+  trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
+  store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+  visited BOOLEAN DEFAULT FALSE,
+  sequence INTEGER NOT NULL,
+  UNIQUE(trip_id, sequence)
+);
+
+CREATE TABLE IF NOT EXISTS promotions (
+  id SERIAL PRIMARY KEY,
+  store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+  title VARCHAR(150) NOT NULL,
+  description TEXT,
+  discount_percentage DECIMAL(5,2) NOT NULL DEFAULT 0,
+  start_date TIMESTAMP NOT NULL,
+  end_date TIMESTAMP NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS referrals (
+  id SERIAL PRIMARY KEY,
+  referrer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  referee_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  referral_code VARCHAR(20) NOT NULL,
+  reward_points INTEGER NOT NULL DEFAULT 0,
+  status VARCHAR(20) NOT NULL DEFAULT 'completed',
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(referrer_id, referee_id)
+);
+
+CREATE TABLE IF NOT EXISTS ratings (
+  id SERIAL PRIMARY KEY,
+  trip_id INTEGER REFERENCES trips(id) ON DELETE CASCADE,
+  target_type VARCHAR(10) NOT NULL,
+  target_id INTEGER NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);

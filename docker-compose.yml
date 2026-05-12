@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: shopta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-shopta}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shopta_password}
+      POSTGRES_DB: ${POSTGRES_DB:-shopta}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/migrations/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      - ./db/seeds/001_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-shopta} -d ${POSTGRES_DB:-shopta}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: shopta-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5001
+      DATABASE_URL: ${DATABASE_URL:-postgresql://shopta:shopta_password@postgres:5432/shopta}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-dev-access-token-secret-change-me}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-dev-refresh-token-secret-change-me}
+      ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN:-15m}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
+      BASE_URL: ${BASE_URL:-http://localhost:5001}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      PYTHON_OPTIMIZER_URL: http://route-optimizer:8000
+      ANALYTICS_SERVICE_URL: http://trip-analytics:8085
+      GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY:-}
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      route-optimizer:
+        condition: service_started
+      trip-analytics:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001/api}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:5001}
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+    container_name: shopta-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001/api}
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:5001}
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+
+  route-optimizer:
+    build:
+      context: .
+      dockerfile: Dockerfile.route-optimizer
+    container_name: shopta-route-optimizer
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  trip-analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile.trip-analytics
+    container_name: shopta-trip-analytics
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8085
+    ports:
+      - "8085:8085"
+
+volumes:
+  postgres-data:

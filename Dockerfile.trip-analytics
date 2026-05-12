@@ -1,0 +1,15 @@
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+COPY trip-analytics-service/pom.xml ./pom.xml
+RUN mvn -q dependency:go-offline
+COPY trip-analytics-service/src ./src
+RUN mvn -q package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+COPY --from=builder /app/target/trip-analytics-service-*.jar app.jar
+
+EXPOSE 8085
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -2,16 +2,17 @@
 import { Pool } from "pg";
 import config from "./config/config";
 
-const pool = new Pool({
-  user: config.db.user,
-  host: config.db.host,
-  database: config.db.name,
-  password: config.db.password,
-  port: config.db.port,
-  ...(config.db.connectionString
+const pool = new Pool(
+  config.db.connectionString
     ? { connectionString: config.db.connectionString }
-    : {}),
-});
+    : {
+        user: config.db.user,
+        host: config.db.host,
+        database: config.db.name,
+        password: config.db.password,
+        port: config.db.port,
+      }
+);
 
 export const initializeDatabase = async (): Promise<void> => {
   const client = await pool.connect();

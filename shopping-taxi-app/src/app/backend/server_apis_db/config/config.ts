@@ -1,6 +1,6 @@
 /**
  * Loads environment variables from a `.env` file into `process.env` using `dotenv`.
- * 
+ *
  * @function requireEnv
  * Throws an error if the specified environment variable is not set.
  * @param varName - The name of the required environment variable.
@@ -10,7 +10,7 @@
 
 /**
  * Represents the configuration required to connect to a database.
- * 
+ *
  * @interface DBConfig
  * @property user - The database user.
  * @property host - The database host.
@@ -22,7 +22,7 @@
 
 /**
  * Represents the application configuration.
- * 
+ *
  * @interface AppConfig
  * @property port - The port on which the application runs.
  * @property db - The database configuration.
@@ -31,7 +31,7 @@
 
 /**
  * The main application configuration object.
- * 
+ *
  * @constant config
  * @type {AppConfig}
  * @default
@@ -44,18 +44,18 @@ dotenv.config();
 
 function requireEnv(varName: string): string {
   const value = process.env[varName];
-  if (!value) throw new Error(`Missing required environment variable: ${varName}`);
+  if (!value)
+    throw new Error(`Missing required environment variable: ${varName}`);
   return value;
 } // this is used to ensure that the environment variables are set before the application starts, it is a utility function to throw an error if the variable is not set
 
 interface DBConfig {
-  user: string;
-  host: string;
-  name: string;
-  password: string;
-  port: number;
+  user?: string;
+  host?: string;
+  name?: string;
+  password?: string;
+  port?: number;
   connectionString?: string;
-
 }
 
 interface AppConfig {
@@ -67,15 +67,19 @@ interface AppConfig {
   analyticsServiceUrl: string;
 }
 
+const databaseUrl = process.env.DATABASE_URL;
+
 const config: AppConfig = {
   port: process.env.PORT ? parseInt(process.env.PORT) : 5001,
-  db: {
-    user: requireEnv("DB_USER"),
-    host: requireEnv("DB_HOST"),
-    name: requireEnv("DB_NAME"),
-    password: requireEnv("DB_PASSWORD"),
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
-  },
+  db: databaseUrl
+    ? { connectionString: databaseUrl }
+    : {
+        user: requireEnv("DB_USER"),
+        host: requireEnv("DB_HOST"),
+        name: requireEnv("DB_NAME"),
+        password: requireEnv("DB_PASSWORD"),
+        port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+      },
   baseUrl: process.env.BASE_URL ?? "http://localhost:5000",
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
   pythonOptimizerUrl:

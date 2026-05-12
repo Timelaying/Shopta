@@ -6,7 +6,10 @@
     "test": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json node --import tsx --test",
     "lint": "eslint -c shopping-taxi-app/.eslintrc.cjs \"shopping-taxi-app/**/*.{ts,tsx,js,jsx}\"",
     "format": "prettier --write .",
-    "start": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json tsx shopping-taxi-app/src/app/backend/server_apis_db/server.ts"
+    "start": "TSX_TSCONFIG=shopping-taxi-app/tsconfig.json tsx shopping-taxi-app/src/app/backend/server_apis_db/server.ts",
+    "db:migrate": "psql \"$DATABASE_URL\" -f db/migrations/001_schema.sql",
+    "db:seed": "psql \"$DATABASE_URL\" -f db/seeds/001_seed.sql",
+    "db:setup": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.7",

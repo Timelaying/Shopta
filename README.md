@@ -28,10 +28,14 @@ This repository contains multiple services:
 ```
 .
 ├── route_optimizer_service/     # microservice for route optimisation (Python)
-├── trip-analytics-service/      # microservice for analytics, promotions, referrals (Node.js/TS)
+├── trip-analytics-service/      # microservice for analytics, promotions, referrals (Java/Spring Boot)
 ├── shopping-taxi-app/           # front-end and API gateway (Next.js, TypeScript)
+├── db/                          # PostgreSQL schema migrations and deterministic seeds
+├── docker-compose.yml           # Local orchestration for PostgreSQL and services
 ├── Dockerfile.backend           # Docker instructions for backend services
 ├── Dockerfile.frontend          # Docker instructions for frontend
+├── Dockerfile.route-optimizer   # Docker instructions for the FastAPI optimizer
+├── Dockerfile.trip-analytics    # Docker instructions for the Spring Boot analytics service
 └── .github/workflows/           # CI/CD pipelines
 ```
 
@@ -42,6 +46,27 @@ This repository contains multiple services:
 - Node.js and npm installed locally.
 - Python 3.8+ and pip.
 - Docker and Docker Compose (optional for containerised setup).
+
+### Environment
+
+Create a local environment file from the example before running services:
+
+```bash
+cp .env.example .env
+```
+
+The example lists the required secrets and connection settings, including the JWT access/refresh token secrets, PostgreSQL URI (`DATABASE_URL`), and Google Maps/Places API keys used by the map UI and store seeding utilities.
+
+### Database setup
+
+For a local PostgreSQL instance, apply the schema and deterministic seed data with:
+
+```bash
+export DATABASE_URL=postgresql://shopta:shopta_password@localhost:5432/shopta
+npm run db:setup
+```
+
+The same SQL files are mounted into the PostgreSQL container by Docker Compose, so a fresh Compose volume is migrated and seeded automatically on first startup.
 
 ### Local Development
 
@@ -79,13 +104,13 @@ cd ../shopping-taxi-app
 npm run dev
 ```
 
-Alternatively, run everything with Docker Compose:
+Alternatively, run PostgreSQL, the backend API, frontend, route optimizer, and trip analytics services with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-The application will be available at `http://localhost:3000`.
+The frontend will be available at `http://localhost:3000`, the backend API at `http://localhost:5001/api`, PostgreSQL at `localhost:5432`, the route optimizer at `http://localhost:8000`, and trip analytics at `http://localhost:8085`.
 
 ## Tests
 

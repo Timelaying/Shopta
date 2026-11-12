@@ -1,5 +1,5 @@
 # Frontend Dockerfile for Next.js application
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=http://localhost:5001/api
 ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:5001
@@ -10,7 +10,7 @@ RUN npm ci
 COPY . .
 RUN cd shopping-taxi-app && npx next build
 
-FROM node:18-alpine
+FROM node:22-alpine
 ARG NEXT_PUBLIC_API_URL=http://localhost:5001/api
 ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:5001
 WORKDIR /app

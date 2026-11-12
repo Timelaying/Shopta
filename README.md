@@ -55,7 +55,7 @@ Create a local environment file from the example before running services:
 cp .env.example .env
 ```
 
-The example lists the required secrets and connection settings, including the JWT access/refresh token secrets, PostgreSQL URI (`DATABASE_URL`), and Google Maps/Places API keys used by the map UI and store seeding utilities.
+The example lists the required secrets and connection settings, including the JWT access/refresh token secrets, PostgreSQL URI (`DATABASE_URL`), (maps use OpenStreetMap, so no map API key is needed).
 
 ### Database setup
 
@@ -143,3 +143,10 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 ## License
 
 This project is licensed under the MIT License.
+
+
+## Deploying (free tier)
+
+- **Database:** a free Postgres (for example Neon). Tables are created automatically when the API starts; `db/seeds/001_seed.sql` is optional sample data.
+- **API (Render web service, Node):** build `npm ci`, start `npm run start`. Set `DATABASE_URL`, `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, `BASE_URL` and `FRONTEND_URL` (comma-separated list of allowed web origins).
+- **Web (Vercel):** root directory `shopping-taxi-app`. Set `NEXT_PUBLIC_API_URL` (the API URL ending in `/api`) and `NEXT_PUBLIC_SOCKET_URL` (the API URL without `/api`).

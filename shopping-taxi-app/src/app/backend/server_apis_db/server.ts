@@ -30,16 +30,18 @@ const httpServer = http.createServer(app);
 
 // Ensure config.frontendUrl exists in your config file
 const frontendUrl = config.frontendUrl || 'http://localhost:3000';
+// FRONTEND_URL may hold several comma-separated origins.
+const allowedOrigins = frontendUrl.split(',').map((o) => o.trim()).filter(Boolean);
 
 const io = new IOServer(httpServer, {
-  cors: { origin: frontendUrl, credentials: true }
+  cors: { origin: allowedOrigins, credentials: true }
 });
 
 // Attach io to app for controllers
 app.set('io', io);
 
 // Middleware
-app.use(cors({ origin: frontendUrl, credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

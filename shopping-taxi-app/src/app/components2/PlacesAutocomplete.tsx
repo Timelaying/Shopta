@@ -1,33 +1,77 @@
 'use client';
-import { FC } from 'react';
-import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
-import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from '@reach/combobox';
-import '@reach/combobox/styles.css';
+import { FC, useEffect, useState } from 'react';
 
 interface Props {
   onSelect: (place: { id: string; description: string; location: { lat: number; lng: number } }) => void | Promise<void>;
 }
+
+interface Suggestion {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
+/** Place search backed by OpenStreetMap Nominatim (free, no API key). */
 export const PlacesAutocomplete: FC<Props> = ({ onSelect }) => {
-  const { ready, value, suggestions, setValue, clearSuggestions } = usePlacesAutocomplete({ requestOptions: { /* bounds, etc */ } });
-  const handleSelect = async (address: string) => {
-    setValue(address, false);
-    clearSuggestions();
-    const results = await getGeocode({ address });
-    const { lat, lng } = await getLatLng(results[0]);
-    await onSelect({ id: results[0].place_id, description: address, location: { lat, lng } });
+  const [value, setValue] = useState('');
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [justSelected, setJustSelected] = useState(false);
+
+  useEffect(() => {
+    if (justSelected || value.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    // Debounce to respect Nominatim's usage policy (max ~1 request/second).
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(value)}`
+        );
+        if (res.ok) setSuggestions(await res.json());
+      } catch {
+        setSuggestions([]);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [value, justSelected]);
+
+  const handleSelect = async (s: Suggestion) => {
+    setJustSelected(true);
+    setValue(s.display_name);
+    setSuggestions([]);
+    await onSelect({
+      id: String(s.place_id),
+      description: s.display_name,
+      location: { lat: parseFloat(s.lat), lng: parseFloat(s.lon) },
+    });
   };
+
   return (
-    <Combobox onSelect={handleSelect} aria-label="Store location">
-      <ComboboxInput value={value} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)} disabled={!ready} placeholder="Search location..." />
-      <ComboboxPopover>
-        <ComboboxList>
-          {suggestions.status === 'OK' && suggestions.data.map(
-            ({ place_id, description }: { place_id: string; description: string }) => (
-              <ComboboxOption key={place_id} value={description} />
-            )
-          )}
-        </ComboboxList>
-      </ComboboxPopover>
-    </Combobox>
+    <div className="relative" aria-label="Store location">
+      <input
+        className="w-full rounded border border-gray-300 p-2"
+        value={value}
+        onChange={(e) => {
+          setJustSelected(false);
+          setValue(e.target.value);
+        }}
+        placeholder="Search location..."
+      />
+      {suggestions.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full rounded border border-gray-200 bg-white shadow">
+          {suggestions.map((s) => (
+            <li
+              key={s.place_id}
+              className="cursor-pointer p-2 text-sm hover:bg-gray-100"
+              onClick={() => handleSelect(s)}
+            >
+              {s.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };

@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 // Removed unused Socket import
 import { useParams } from 'next/navigation';
 import apiClient from '@/app/services/apiClient';
-import GoogleMap from '@/app/components2/GoogleMap';
+import MapView from '@/app/components2/MapView';
 import { SOCKET_URL } from '@/app/services/socketConfig';
 
 export default function DriverTrip() {
@@ -34,7 +34,7 @@ export default function DriverTrip() {
   return (
     <main className="p-8">
       <h1>Driver Trip #{id}</h1>
-      <GoogleMap coords={stops.map(s=>[s.latitude, s.longitude])} />
+      <MapView coords={stops.map(s=>[s.latitude, s.longitude])} />
       {position && <p>My position: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}</p>}
     </main>
   );

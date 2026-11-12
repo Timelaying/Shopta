@@ -1,12 +1,12 @@
 // src/app/Frontend/Admin/MapReady/page.tsx (subscribe to socket)
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import GoogleMap from '@/app/components2/GoogleMap';
+import MapView from '@/app/components2/MapView';
 import { SOCKET_URL } from '@/app/services/socketConfig';
 
-export default function AdminMapLive() {
+function AdminMapLive() {
   const params = useSearchParams();
   const tripId = params.get('trip');
   const [coords, setCoords] = useState<[number,number][]>([]);
@@ -23,7 +23,15 @@ export default function AdminMapLive() {
   return (
     <main className="p-8">
       <h1>Live Taxi Location for Trip {tripId}</h1>
-      <GoogleMap coords={coords} />
+      <MapView coords={coords} />
     </main>
+  );
+}
+
+export default function AdminMapReadyPage() {
+  return (
+    <Suspense fallback={<p className="p-8">Loading…</p>}>
+      <AdminMapLive />
+    </Suspense>
   );
 }

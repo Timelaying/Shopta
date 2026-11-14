@@ -76,7 +76,7 @@ Mapping & Real‑time Updates
 
 Frontend uses Google Maps and Leaflet for displaying store locations and trip paths.
 
-Customers can also search for nearby stores on a Google Map by visiting `/Frontend/Customer/NearbyStores`. This feature relies on the Google Places API, so set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in your environment.
+Customers can also search for nearby stores on an OpenStreetMap map by visiting `/Frontend/Customer/NearbyStores`. Maps use Leaflet and store lookup uses the free Overpass API, so no map API key is needed.
 
 Drivers send live location updates via sockets; admins view trip progress in real time.
 

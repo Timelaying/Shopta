@@ -3,8 +3,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import apiClient from '@/app/services/apiClient';
-import Map from '@/app/components2/Map';
-import GoogleMap from '@/app/components2/GoogleMap';
+import MapView from '@/app/components2/MapView';
 import { Button } from '@/components/ui/button';
 
 type Stop = {
@@ -46,8 +45,8 @@ export default function StoreDetail() {
     <main className="p-8">
       <h1>{stop?.name || store?.name}</h1>
       {store && <p>{store.address}</p>}
-      {stop && <Map coords={[stop.coords]} />}
-      {store && <GoogleMap coords={[[store.latitude, store.longitude]]} />}
+      {stop && <MapView coords={[stop.coords]} />}
+      {store && <MapView coords={[[store.latitude, store.longitude]]} />}
       {stop && (
         <Button onClick={async () => {
           await apiClient.patch(`/trips/stops/${stop.id}/done`, {}, { withCredentials: true });

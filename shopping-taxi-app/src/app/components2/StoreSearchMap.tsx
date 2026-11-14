@@ -22,6 +22,7 @@ async function fetchNearbyStores(lat: number, lng: number): Promise<MarkerInfo[]
   const query = `[out:json][timeout:20];node(around:5000,${lat},${lng})["shop"~"supermarket|convenience|grocery|department_store|mall"]["name"];out 30;`;
   const res = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
+    signal: AbortSignal.timeout(12000),
     body: 'data=' + encodeURIComponent(query),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
@@ -44,7 +45,20 @@ export default function StoreSearchMap() {
     const search = async (loc: [number, number]) => {
       setCenter(loc);
       try {
-        const found = await fetchNearbyStores(loc[0], loc[1]);
+        let found: MarkerInfo[];
+        try {
+          found = await fetchNearbyStores(loc[0], loc[1]);
+        } catch {
+          // Overpass can be slow or unavailable: fall back to stores saved in our own database.
+          const res = await apiClient.get('/stores');
+          found = (res.data.stores || []).map(
+            (st: { id: number; name: string; latitude: string; longitude: string }) => ({
+              id: `db-${st.id}`,
+              position: [parseFloat(st.latitude), parseFloat(st.longitude)] as [number, number],
+              name: st.name,
+            })
+          );
+        }
         setMarkers(found);
         setSaveStatus((prev) => {
           const next: Record<string, 'idle' | 'saving' | 'saved' | 'error'> = {};
